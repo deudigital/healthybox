@@ -1,0 +1,177 @@
+﻿body{font-family: 'Muli', sans-serif;color:#999}
+
+.input:focus::placeholder{display:none}
+
+.input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+	font-size: 14px;
+	line-height: 50px;
+	color: #bfbfbf;
+	font-weight: 300;
+}
+.input::-moz-placeholder { /* Firefox 19+ */
+	font-size: 14px;
+	line-height: 50px;
+	color: #bfbfbf;
+	font-weight: 300;
+}
+.input:-ms-input-placeholder { /* IE 10+ */
+	font-size: 14px;
+	line-height: 50px;
+	color: #bfbfbf;
+	font-weight: 300;
+}
+.input:-moz-placeholder { /* Firefox 18- */
+	font-size: 14px;
+	line-height: 50px;
+	color: #bfbfbf;
+	font-weight: 300;
+}
+.input:focus::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color:transparent;
+}
+.input:focus::-moz-placeholder { /* Firefox 19+ */
+  color:transparent
+}
+.input:focus:-ms-input-placeholder { /* IE 10+ */
+  color:transparent
+}
+.input:focus:-moz-placeholder { /* Firefox 18- */
+  color:transparent
+}
+
+
+.login form { border: none;}
+.login form .input { border: none; border-bottom: 1px solid #cecece; border-radius: 0; color: #000;box-shadow:none }
+.login h1 a { position: absolute; top: -160px; left: calc(50% - 50px); width:130px; height:147px;}
+.login #nav { text-align: center; display: flex; justify-content: center; flex-direction: column; height: 100%;}
+.login #nav > h3 {margin-bottom: 15px;font-weight: 800;}
+.login form:not(#registerform) #nav { float: right; width: 43%;}
+.login #nav a { background-color: #96b654; color: #fff !important; padding: 8px; width: 100%; max-width: 250px; margin: 0 auto 15px; text-transform: uppercase; font-weight: 600; border-radius: 25px;font-weight:600}
+.login #backtoblog {text-align: center;}
+#login {background-color: #fff; box-shadow: 0 5px 10px #ccc;position: relative;border-top: 1px solid #ed7260;margin-top: 100px;}
+#login > #lostpasswordform, 
+#login > #resetpassform,
+#login > #loginform {border: none; border-right: 1px solid #cecece;color:#cecece;}
+
+#login form p.submit {display: flex;width:100%}
+#login form p.submit .button {border-radius: 25px;box-shadow: none;text-shadow: none;text-transform:uppercase;min-height:38px;}
+#resetpassform p.submit .button, #lostpasswordform p.submit .button, #loginform p.submit .button {
+	background-color: #ed7260;
+	border-color: #ed7260;
+	width: 100%;
+	margin-top: 25px;
+	font-weight: 700;
+}
+#registerform p.submit .button { background-color: #96b654;  border-color: #96b654; width: 250px; margin:auto; }
+#registerform p.submit .button[disabled] { background-color: #96b654 !important;  border-color: #96b654 !important;color: #c5c5c5 !important; }
+#reg_passmail {padding: 15px;text-align: center;margin-top: 30px;}
+.login #nav a:empty {display: none;}
+
+#login form p, #login form .user-pass-wrap {position: relative;}
+#login form p:not(.forgetmenot) label, 
+#login form .user-pass-wrap label{position: absolute;top: -10px;z-index: 10;}
+.login label {font-size: 12px;line-height: 1;}
+.message.register {display: none;}
+
+.input + label {display:none}
+/*.input + label {font-size:12px;-webkit-transition: all 0.2s ease;-moz-transition: all 0.2s ease;-ms-transition: all 0.2s ease;-o-transition: all 0.2s ease;transition: all 0.2s ease;}
+.input:focus + label {margin-top: -160px;}
+.input + label {margin-top: -160px;}*/
+/*.input:not(:focus):not(:empty) + label {margin-top: -75px;}*/
+/*.input:empty + label {margin-top: -75px;}*/
+
+
+
+/**/
+#reg_passmail{display:none;}
+body.login-action-login #backtoblog{display:none}
+
+body.login-action-register label{font-size:1.25em;}
+body.login-action-register #nav{display:none}
+
+.dia {font-weight: 200;font-size: 2.5em;}
+.box-dashed {border: 1px dashed #ccc;padding: 30px 20px;position: relative;margin-bottom:45px;margin-top:30px}
+.box-dashed::before {display: block;position: absolute;content: "";top: -15px;background-color: #fff;	color: #6f6f6f;font-weight: 800;font-size:1.25em}
+.register-description {text-align: center;padding:15px;}
+
+.info-personal::before {content: "Informacion Personal";left: 30px;}
+.direcciones:before {content: "Entrega de Platos";}
+.dieta-cliente:before {content: "Dieta";}
+
+
+.dropdowns > .combo > select {padding: 1%;max-width: 100%;width: 100%;border: none;box-shadow: 0 0 5px #ccc;cursor: pointer;padding: 15px;color: #999;font-size:14px}
+.dropdowns > .combo > label {margin-bottom: 15px;font-size: 1.25em;}
+.direccion-entrega * { font-family:inherit;}
+.direccion-entrega textarea { display: flex;border: none;width: 100%;border-bottom: 1px solid #ccc;max-width: 100%;padding:5px;}
+.direccion:not(:first-child) {margin-top: 50px;}
+.copy-address {color: #ed7260;font-size: 11px !important;margin-top: 15px;margin-bottom: 20px !important;}
+#container-address-lunes {margin-top: -15px;}
+
+
+.box-dashed.container-privacity {margin-top: 50px;padding: 15px 30px;font-size: 0.75em;line-height: 1em;}
+.container-privacity > label {margin-bottom: 0 !important;}
+.container-privacity > label > input {margin-right: 10px;}
+
+.container-privacity.required {background-color: rgba(255,0,0,0.05);color:#e47263;border-color:#e47263;}
+.container-privacity.required a {color: inherit;}
+
+
+
+/*
+.form-table.dieta {line-height: 1em;width: auto;display: table;border: 1px solid #f0f1f0;}
+.form-table.dieta thead tr th {text-align: center;padding: 10px;}
+.form-table.dieta tbody tr td,table.dieta tbody tr th {padding: 5px 15px !important;text-align: center;}
+.form-table.dieta tbody tr th {text-align: right;}
+.form-table.dieta tbody tr td {background-color: #f0f1f0;border: 1px solid #fff;}
+.form-table.dieta tbody tr td input {margin: 0 !important;width: 70px !important;font-size: 1.25em !important;min-height: auto !important;text-align: center;}
+*/
+.form-table.dieta {margin-top:15px}
+.form-table.dieta tbody tr td {border: 1px solid #fff;}
+.form-table.dieta tbody tr td:not(:first-child) {background-color: #f0f1f0;}
+.form-table.dieta tbody tr td input {margin: 0 !important;font-size: 1.25em !important;min-height: auto !important;text-align: center;}
+
+@media(min-width:768px){
+	.form-table.dieta {margin-top:30px}
+
+	.box-dashed::before {top: -18px;font-size: 1.75em;}
+	#login {margin-bottom:75px;}
+	#login > #lostpasswordform, 
+	#login > #resetpassform,
+	#login > #loginform { float: left; width: 30%; padding: 2%;padding: 30px 100px 30px 100px;min-height:240px; }
+	#login {width: 700px; display: table; padding: 0;}
+	.login #backtoblog {width: 100%; flex: 1; justify-items: end; justify-content: end; max-width: 95%;margin-bottom:50px }
+	#registerform {padding-right: 60px;}
+	.info-personal {display: grid;grid-template-columns: 35% 35%;grid-column-gap: 20%;margin-top: 100px;}
+	.register-description {padding: 30px 15px;font-size: 1.25em;}
+	.dropdowns {display: grid;grid-template-columns: 30% 30% 30%;width: 100%;margin: 15px 0;grid-column-gap: 5%;}
+	.direcciones {padding-right: 130px;}
+	.direcciones {margin-bottom: 0;margin-top: 50px;padding-top: 40px;padding-bottom: 60px;}
+	.info-personal::before {}
+	.box-dashed {padding: 65px 30px 75px;}
+	body.login-action-register #direcciones {margin-bottom: 75px;}
+}
+@media(min-width:992px){
+	.login h1 a { left: calc(50% - 42px);background-size:cover }
+	#login {width: 940px;margin-top:175px;padding-top:0}
+	.login #nav {margin-top: 90px;}
+	
+	.form-table.dieta {line-height: 1em;width: auto;display: table;border: 1px solid #f0f1f0;}
+	.form-table.dieta thead tr th {text-align: center;padding: 10px;}
+	.form-table.dieta tbody tr td,table.dieta tbody tr th {padding: 5px 15px !important;}
+	.form-table.dieta tbody tr td:not(:first-child) {text-align: center;}
+	.form-table.dieta tbody tr th {text-align: right;}
+	.form-table.dieta tbody tr td input {width: 70px !important;}
+}
+@media(min-width:1200px){
+	.box-dashed::before {top:-25px;font-size: 2.25em;}
+}
+@media(max-width:991px){
+	.login h1 a {top: -100px;width: 100px;height: 100px;}
+	.direccion-entrega .combo {margin-top: 10px;}
+	input[type="checkbox"]:checked::before {width: 20px;height: 20px;}
+	input[type="checkbox"], input[type="radio"] {height: 16px !important;width: 16px !important;}
+}
+@media(max-width:767px){
+	.dropdowns {margin-bottom: 10px;}
+	#registerform {margin-top: 0;padding-top: 0;}
+}
