@@ -508,9 +508,11 @@ class Direccion_List extends WP_List_Table {
 		echo 'p.search-box{margin:5px 10px;min-width:150px}';
 		echo 'p.search-box label{display:block}';
 		echo 'p.search-box select{width:100%;max-width:100%}';
+		echo '.dropdowns > .combo:not(:first-child){margin-left:10px;}';
 		echo '.combo{display:inline-block}';
 		echo '.combo label{display:block}';
-		echo '.combo select{min-width:100px}';
+		echo '.combo select{min-width:150px}';
+		echo '.combo .button{margin-top:-4px}';
 		echo '</style>';
 
 /*?>
