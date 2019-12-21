@@ -241,22 +241,33 @@ function alimentos_custom_columns($column) {
 				echo '<ul style="margin:0">' . $html . '</ul>';
 			break;
         case 'semana':
-			$_esc_alimento_semana	=	get_post_meta($post->ID, '_esc_alimento_semana', true);
-			/*_print($_esc_alimento_semana);
-            echo ucfirst($_esc_alimento_semana);
-			*/
-			$output	=	implode(', ', array_keys($_esc_alimento_semana));
+			$_esc_alimento_semana_dias	=	get_post_meta($post->ID, '_esc_alimento_semana_dias', true);
+			$output	=	array();
+			foreach($_esc_alimento_semana_dias as $semana=>$dias)
+				$output[]	=	ucfirst($semana);
+
+			$output	=	implode(', ', $output);
 			echo $output;
 			break;
         case 'dia':
+			$_esc_alimento_semana_dias	=	get_post_meta($post->ID, '_esc_alimento_semana_dias', true);
+			$output	=	array();
+			foreach($_esc_alimento_semana_dias as $semana=>$dias){
+				$res	=	array();
+				foreach($dias as $dia)
+					$res[]	=	ucfirst($dia);
+				
+				//$output[ucfirst($semana)]	=	implode(', ', $res);
+				$output[]	=	ucfirst($semana) . ': ' . implode(', ', $res);
+			}
+			$output	=	implode('<br>', $output);
+			echo $output;
+			break;
+        /*case 'dia':
 			$_esc_alimento_dias	=	get_post_meta($post->ID, '_esc_alimento_dias', true);
-			/*$output	=	'';
-			foreach($_esc_alimento_semana as $key=>$value)
-				$output	.=	ucfirst($key);
-			*/
 			$output	=	implode(', ', array_keys($_esc_alimento_dias));
             echo ucfirst($output);
-			break;
+			break;*/
         case 'precio':
 			$_esc_alimento_precio	=	get_post_meta($post->ID, '_esc_alimento_precio', true);
             echo $_esc_alimento_precio;
@@ -617,9 +628,9 @@ add_filter( "bulk_actions-edit-orden", '_esc_bulk_actions');
 function _esc_bulk_actions($_actions){
 	return array();
 }
-add_filter( 'posts_where' , '_esc_alimento_posts_where' );
+/*add_filter( 'posts_where' , '_esc_alimento_posts_where' );
 add_filter( 'posts_where' , '_esc_orden_posts_where' );
-add_filter( 'posts_join' , '_eschb_posts_join', 10, 2 );
+add_filter( 'posts_join' , '_eschb_posts_join', 10, 2 );*/
 function _esc_orden_restrict_manage_posts_filters($post_type, $which) {
 	/*_print(func_get_args());*/
 	if(!in_array($post_type, array('orden')))
@@ -720,7 +731,82 @@ function _eschb_posts_join($join, $query){
 }
 
 
+/*add_action( 'pre_get_posts', '_eschb_pre_get_posts');*/
+function _eschb_pre_get_posts( $wp_query ){
+	/*_print($_REQUEST);
+	/*_print($wp_query);*/
+	
+	$filter_categoria_alimento = isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
+    $filter_semana = isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
+    $filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+	
+	if(!empty($filter_semana)){
+/*		$wp_query->meta_query	=	array(
+										array(
+											'key'		=>	'_esc_alimento_semana_dias',
+											'value'		=>	serialize($filter_semana),
+											'compare'	=>	'LIKE'
+										)
+									);*/
+		$wp_query->set( 'meta_key', '_esc_alimento_semana_dias' );
+		$wp_query->set( 'meta_value', serialize($filter_semana) );
+		$wp_query->set( 'meta_compare', 'LIKE' );
+	}
+	if(!empty($filter_categoria_alimento)){
+		$wp_query->set( 'meta_key', '_esc_alimento_categoria' );
+		$wp_query->set( 'meta_value', serialize($filter_categoria_alimento) );
+		$wp_query->set( 'meta_compare', 'LIKE' );
+	}
+}
+add_action( 'parse_query', '_eschb_parse_query');
+function _eschb_parse_query($wp_query){
+global $plugin_page, $typenow;
+	if($typenow!='alimento')
+		return ;
 
+
+/*[typenow] => alimento
+[post_type] => alimento*/
+
+//                          	_print($GLOBALS);
+	
+	/*_print('typenow->' . $GLOBALS['typenow']);
+	_print('$plugin_page: ' . $plugin_page);
+	_print('typenow: ' . $typenow);*/
+	/*_print($wp_query->query_vars);*/
+	if($wp_query->query_vars['post_type'] != 'alimento')
+		return ;
+	
+	/*_print('$wp_query');
+	_print($wp_query);*/
+	$filter_categoria_alimento = isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
+    $filter_semana = isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
+    $filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+	
+	$meta_query	=	array();
+	if(!empty($filter_semana)){	
+		$meta_query[]	=	array(
+								'key'		=>	'_esc_alimento_semana_dias',
+								'value'		=>	serialize($filter_semana),
+								'compare'	=>	'LIKE'
+							);
+	}
+	if(!empty($filter_categoria_alimento)){
+		$meta_query[]	=	array(
+								'key'		=>	'_esc_alimento_categoria',
+								'value'		=>	serialize($filter_categoria_alimento),
+								'compare'	=>	'LIKE'
+							);
+	}
+	if(!empty($filter_dia)){
+		$meta_query[]	=	array(
+								'key'		=>	'_esc_alimento_semana_dias',
+								'value'		=>	serialize($filter_dia),
+								'compare'	=>	'LIKE'
+							);
+	}
+	$wp_query->query_vars['meta_query']	=	$meta_query;
+}
 
 
 function form(){
@@ -828,7 +914,7 @@ function concerts_pre_get_posts( $query ) {
 }
 //add_filter( 'pre_get_posts', 'concerts_pre_get_posts' );
 
-/*add_filter( 'posts_request', '_eschb_posts_request');*/
+//add_filter( 'posts_request', '_eschb_posts_request');
 function _eschb_posts_request($request){
 	_print($request);
 	return $request;
