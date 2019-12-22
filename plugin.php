@@ -80,6 +80,17 @@ class HB_Plugin {
 
 		add_action( 'wp_enqueue_scripts',  array($this, '_esc_enqueue_scripts'), 999 );		
         add_action('admin_enqueue_scripts', array($this, '_esc_admin_enqueue_scripts'));
+		
+		add_filter( 'editable_roles', array($this, '_eschb_editable_roles') );
+	}
+	function _eschb_editable_roles($all_roles ){
+		$healthybox_roles	=	array('cliente','cocina', 'healthybox_servicio_cliente', 'healthybox_manager');
+		$roles	=	array();
+		foreach($all_roles as $key=>$role){
+			if(in_array($key, $healthybox_roles))			
+				$roles[$key]	=	$role;
+		}
+		return $roles;
 	}
 	function _eschb_blog_favicon() {
 		/*echo '<link rel="shortcut icon" href="' . plugin_dir_url( __FILE__ ) . 'assets/images/favicon.png" >';*/
@@ -599,9 +610,9 @@ WP_Screen Object
         $wp_admin_bar->remove_menu('edit-profile');
 	}
 	function remove_profile_menu() {
-		/*if(current_user_can('update_core') || current_user_can('manage_healthybox'))
-			return ;*/
-		if(current_user_can('update_core') || current_user_can('manage_healthybox')){
+		if(current_user_can('update_core'))
+			return ;
+		if( current_user_can('manage_healthybox')){
 			$user	=	wp_get_current_user();
 			$roles	=	( array ) $user->roles;
 			if(in_array('healthybox_manager', $roles)){
@@ -609,9 +620,8 @@ WP_Screen Object
 				remove_submenu_page('edit-tags.php?taxonomy=category', 'edit-tags.php?taxonomy=category');
 				remove_submenu_page('edit-tags.php?taxonomy=category', 'edit-tags.php?taxonomy=post_tag');
 			}
-			return ;
+			/*return ;*/
 		}
-
 		remove_submenu_page('users.php', 'profile.php');
 		remove_menu_page('profile.php');
 		remove_menu_page('index.php');
@@ -621,8 +631,7 @@ WP_Screen Object
 		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return;
 		}
-		
-		if(current_user_can('update_core') || current_user_can('manage_healthybox'))
+		if(current_user_can('update_core'))
 			return ;
 		
 		$user	=	wp_get_current_user();
@@ -633,6 +642,10 @@ WP_Screen Object
 		}				
 		global $pagenow;
 		if(in_array($pagenow, array('index.php','profile.php'))){
+			if(current_user_can('manage_healthybox')) {
+				wp_redirect(admin_url('/edit.php?post_type=orden', 'http'), 301);
+				exit;
+			}
 			if(current_user_can('manage_empaques')) {
 				wp_redirect(admin_url('/admin.php?page=empaque', 'http'), 301);
 				exit;
@@ -789,7 +802,11 @@ WP_Screen Object
 				'manage_produccions'		=>	true,
 				'manage_direccions'			=>	true,
 				'manage_healthybox'			=>	true,
+				'manage_users'			=>	true,
+				'create_users'				=>	true,
 				'edit_users'				=>	true,
+				'delete_users'				=>	true,
+				'list_users'				=>	true,
 				'manage_categories'      	=> true,
 				
 				'edit_alimento'         	=>	true,
