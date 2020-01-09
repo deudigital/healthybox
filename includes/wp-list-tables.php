@@ -486,9 +486,13 @@ function ordens_custom_columns($column) {
         case 'estado':
 			$estados	=	_esc_getEstadosOrder();
 			$_esc_orden_status	=	get_post_meta($post->ID, '_esc_orden_status', true);
+			
+			$_esc_orden_cliente_id		=	get_post_meta($post->ID, '_esc_orden_cliente_id', true);	
+			$conDieta	=	_esc_clienteTieneDieta( $_esc_orden_cliente_id );
             
 			echo '<span data-status="' . $_esc_orden_status . '">' . $estados[$_esc_orden_status] . '</span>';
-			
+			if(!$conDieta)
+				echo '<br><strong id="cliente-sin-dieta"><small>Cliente sin Dieta</small></strong>';
 			break;
 
     }
@@ -589,7 +593,13 @@ function misha_quick_edit_save( $post_id ){
  
 	// update the price
 	if ( isset( $_POST['esc_orden_status'] ) ) {
- 		update_post_meta( $post_id, '_esc_orden_status', $_POST['esc_orden_status'] );
+		$conDieta	=	false;
+		if($_POST['esc_orden_status']=='aprobado'){
+			$_esc_orden_cliente_id		=	get_post_meta($post_id, '_esc_orden_cliente_id', true);	
+			$conDieta	=	_esc_clienteTieneDieta( $_esc_orden_cliente_id );
+		}
+		if($conDieta)
+			update_post_meta( $post_id, '_esc_orden_status', $_POST['esc_orden_status'] );
 	}
  /*
 	// update checkbox
@@ -611,10 +621,10 @@ function _eschb_months_dropdown_results( $months, $post_type ){
 function _esc_alimento_restrict_manage_posts_filters($post_type, $which) {
 	if(!in_array($post_type, array('alimento')))
 		return ;
-    $filter_categoria_alimento = isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
-    $filter_semana = isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
-    $filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
-	$html	=	'<style>.search-box > label{display:block}.tablenav .actions {margin-bottom: 8px;}</style>';
+    $filter_categoria_alimento	=	isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
+    $filter_semana 				=	isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
+    $filter_dia					=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+
 	$html	.=	_esc_filterCategoriasAlimento( $filter_categoria_alimento );
 	$html	.=	_esc_filterSemana($filter_semana);
 	$html	.=	_esc_filterDia($filter_dia);
@@ -628,134 +638,44 @@ add_filter( "bulk_actions-edit-orden", '_esc_bulk_actions');
 function _esc_bulk_actions($_actions){
 	return array();
 }
-/*add_filter( 'posts_where' , '_esc_alimento_posts_where' );
-add_filter( 'posts_where' , '_esc_orden_posts_where' );
-add_filter( 'posts_join' , '_eschb_posts_join', 10, 2 );*/
+
 function _esc_orden_restrict_manage_posts_filters($post_type, $which) {
-	/*_print(func_get_args());*/
 	if(!in_array($post_type, array('orden')))
 		return ;
     $filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'actual';
     $filter_estado_orden = isset( $_REQUEST['orden_status'] ) ? wp_unslash( trim( $_REQUEST['orden_status'] ) ) : '';
 
-	$html	=	'<style>.search-box > label{display:block}.tablenav .actions {margin-bottom: 8px;}</style>';
-	$html	.=	_esc_filterPeriodos( $filter_periodo );
+	$html	=	_esc_filterPeriodos( $filter_periodo );
 	$html	.=	_esc_filterEstadosOrden($filter_estado_orden );
 	echo $html;
 }
 add_action('restrict_manage_posts','_esc_orden_restrict_manage_posts_filters', 10, 2);
-function _esc_alimento_posts_where( $where ) {
-    if( is_admin() && $_REQUEST['post_type']=='alimento' ) {
-        global $wpdb;
-			
-		$filter_categoria_alimento	=	isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
-		$filter_semana 				=	isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
-		$filter_dia 				=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+
+add_action( 'parse_query', '_eschb_parse_query_orden');
+function _eschb_parse_query_orden($wp_query){
+	global $plugin_page, $typenow;
+	if($typenow!='orden')
+		return ;
+
+	if($wp_query->query_vars['post_type'] != 'orden')
+		return ;
 	
-        if ( !empty( $filter_semana ) ){
-            $where	.=	'AND meta_key=\'_esc_alimento_semana\' ';
-            $where	.=	'AND meta_value=\'' . $filter_semana . '\' ';
-        }
-        if ( !empty( $filter_dia ) ){
-            $where	.=	'AND meta_key=\'_esc_alimento_dias\' ';
-            $where	.=	'AND meta_value LIKE \'%' . $filter_dia . '%\' ';
-            /*$where	.=	'AND meta_value REGEXP \'.*\"' . $filter_dia . '\";s:[0-9]+:\".*yes.*\".*\' ';*/
-        }
-        if ( !empty( $filter_categoria_alimento ) ){
-            $where	.=	'AND meta_key=\'_esc_alimento_categoria\' ';
-            $where	.=	'AND meta_value LIKE \'%' . $filter_categoria_alimento . '%\' ';
-            /*$where	.=	'AND meta_value REGEXP \'.*\"' . $filter_categoria_alimento . '\";s:[0-9]+:\".*yes.*\".*\' ';*/
-           
-
-        }
-    }
-	/*_print($where);*/
-    return $where;
-}
-function _esc_orden_posts_where( $where ) {
-    if( is_admin() && $_REQUEST['post_type']=='orden' ) {
-        global $wpdb;
-		$filter_periodo		=	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'actual';
-        if ( !empty( $filter_periodo ) ){
-			$periodos	=	_esc_getPeriodos();		
-			$filter_periodo	=	$periodos[$filter_periodo]['jueves']->getTimestamp();
-		
-			$fecha	=	new DateTime();
-			$fecha->setTimestamp($filter_periodo);
-			/*
-			 *	restamos 1 dia para tomar en cuenta el dia "desde"
-			*/
-			$fecha->modify('-1 day');
-			$period_end	=	new DateTime('next wednesday');
-			$date_from	=	$fecha->format('Y-m-d');
-			/*$fecha->modify('next wednesday');*/
-			/*
-			 *	adicionamos 1 dia para tomar en cuenta el dia "Hasta"
-			*/
-			$fecha->modify('next wednesday + 1 day');
-			$date_end	=	$fecha->format('Y-m-d');
-
-            $where	.=	'AND post_status=\'publish\' ';
-            $where	.=	'AND date(post_date) BETWEEN \'' . $date_from . '\' AND \'' . $date_end . '\'';
-        }
-		$filter_estado_orden=	isset( $_REQUEST['orden_status'] ) ? wp_unslash( trim( $_REQUEST['orden_status'] ) ) : '';
-        if ( !empty( $filter_estado_orden ) ){
-            $where	.=	'AND meta_key=\'_esc_orden_status\' ';
-            $where	.=	'AND meta_value=\'' . $filter_estado_orden . '\' ';
-        }
-    }   
-    return $where;
-}
-function _eschb_posts_join($join, $query){
-	if(!in_array($query->query['post_type'], array('orden', 'alimento')))
-		return $join;
-	/*_print($query->query['post_type'] . ' join');*/
-	if($query->query['post_type']=='orden'){
-		$filter_estado_orden = isset( $_REQUEST['orden_status'] ) ? wp_unslash( trim( $_REQUEST['orden_status'] ) ) : '';
-		if(empty($filter_estado_orden))
-			return $join;
-	}
-	if($query->query['post_type']=='alimento'){
-		$filter_categoria_alimento 	=	isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
-		$filter_semana 				=	isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
-		$filter_dia 				=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
-	/*_print('$filter_categoria_alimento: ' . $filter_categoria_alimento);
-	_print('$filter_semana: ' . $filter_semana);*/
-		if(empty($filter_semana) && empty($filter_dia) && empty($filter_categoria_alimento))
-			return $join;
-	}
-	/*_print('yes');*/
-    global $wpdb, $post, $wp_query;
-    $join .= " INNER JOIN {$wpdb->prefix}postmeta ON post_id = ID";
-    return $join;
-}
-
-
-/*add_action( 'pre_get_posts', '_eschb_pre_get_posts');*/
-function _eschb_pre_get_posts( $wp_query ){
-	/*_print($_REQUEST);
-	/*_print($wp_query);*/
+	$filter_periodo		=	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'actual';
+    $filter_estado_orden=	isset( $_REQUEST['orden_status'] ) ? wp_unslash( trim( $_REQUEST['orden_status'] ) ) : '';
 	
-	$filter_categoria_alimento = isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
-    $filter_semana = isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
-    $filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+	$meta_query	=	array();
+	$args	=	array();
+	$args	=	_esc_getArgsPeriodo($args, $filter_periodo);
+
 	
-	if(!empty($filter_semana)){
-/*		$wp_query->meta_query	=	array(
-										array(
-											'key'		=>	'_esc_alimento_semana_dias',
-											'value'		=>	serialize($filter_semana),
-											'compare'	=>	'LIKE'
-										)
-									);*/
-		$wp_query->set( 'meta_key', '_esc_alimento_semana_dias' );
-		$wp_query->set( 'meta_value', serialize($filter_semana) );
-		$wp_query->set( 'meta_compare', 'LIKE' );
-	}
-	if(!empty($filter_categoria_alimento)){
-		$wp_query->set( 'meta_key', '_esc_alimento_categoria' );
-		$wp_query->set( 'meta_value', serialize($filter_categoria_alimento) );
-		$wp_query->set( 'meta_compare', 'LIKE' );
+	$wp_query->query_vars['date_query']	=	$args['date_query'];
+	if(!empty($filter_estado_orden)){
+		$_esc_orden_status	=	get_post_meta($post->ID, '_esc_orden_status', true);
+		$meta_query[]	=	array(
+								'key'		=>	'_esc_orden_status',
+								'value'		=>	$filter_estado_orden,
+							);
+		$wp_query->query_vars['meta_query']	=	$meta_query;
 	}
 }
 add_action( 'parse_query', '_eschb_parse_query');
@@ -764,24 +684,12 @@ global $plugin_page, $typenow;
 	if($typenow!='alimento')
 		return ;
 
-
-/*[typenow] => alimento
-[post_type] => alimento*/
-
-//                          	_print($GLOBALS);
-	
-	/*_print('typenow->' . $GLOBALS['typenow']);
-	_print('$plugin_page: ' . $plugin_page);
-	_print('typenow: ' . $typenow);*/
-	/*_print($wp_query->query_vars);*/
 	if($wp_query->query_vars['post_type'] != 'alimento')
 		return ;
 	
-	/*_print('$wp_query');
-	_print($wp_query);*/
-	$filter_categoria_alimento = isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
-    $filter_semana = isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
-    $filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+	$filter_categoria_alimento	=	isset( $_REQUEST['filter_categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['filter_categoria_alimento'] ) ) : '';
+    $filter_semana				=	isset( $_REQUEST['filter_semana'] ) ? wp_unslash( trim( $_REQUEST['filter_semana'] ) ) : '';
+    $filter_dia					=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
 	
 	$meta_query	=	array();
 	if(!empty($filter_semana)){	
@@ -808,114 +716,3 @@ global $plugin_page, $typenow;
 	$wp_query->query_vars['meta_query']	=	$meta_query;
 }
 
-
-function form(){
-
-	$from = ( isset( $_GET['mishaDateFrom'] ) && $_GET['mishaDateFrom'] ) ? $_GET['mishaDateFrom'] : '';
-	$to = ( isset( $_GET['mishaDateTo'] ) && $_GET['mishaDateTo'] ) ? $_GET['mishaDateTo'] : '';
-
-	echo '<style>
-	input[name="mishaDateFrom"], input[name="mishaDateTo"]{
-		line-height: 28px;
-		height: 28px;
-		margin: 0;
-		width:125px;
-	}
-	</style>
-
-	<input type="text" name="mishaDateFrom" placeholder="Date From" value="' . $from . '" />
-	<input type="text" name="mishaDateTo" placeholder="Date To" value="' . $to . '" />
-
-	<script>
-	jQuery( function($) {
-		var from = $(\'input[name="mishaDateFrom"]\'),
-			to = $(\'input[name="mishaDateTo"]\');
-
-		$( \'input[name="mishaDateFrom"], input[name="mishaDateTo"]\' ).datepicker();
-		// by default, the dates look like this "April 3, 2017" but you can use any strtotime()-acceptable date format
-			// to make it 2017-04-03, add this - datepicker({dateFormat : "yy-mm-dd"});
-
-
-			// the rest part of the script prevents from choosing incorrect date interval
-			from.on( \'change\', function() {
-			to.datepicker( \'option\', \'minDate\', from.val() );
-		});
-
-		to.on( \'change\', function() {
-			from.datepicker( \'option\', \'maxDate\', to.val() );
-		});
-
-	});
-	</script>';
-
-}
-// HTML of the filter
-/*add_action( 'restrict_manage_posts', '_esc_form' );*/
-/*add_action( 'pre_get_posts', 'filterquery' );*/
-/*
- * The main function that actually filters the posts
- */
-function filterquery( $admin_query ){/*_print($admin_query->query_vars['post_type']);*/
-	/*_print($admin_query);*/
-	global $pagenow;
-_print($pagenow);
-	if (
-		is_admin()
-		&& $admin_query->is_main_query()
-		// by default filter will be added to all post types, you can operate with $_GET['post_type'] to restrict it for some types
-		&& in_array( $pagenow, array( 'edit.php' ) )
-		&& $admin_query->query_vars['post_type']=='orden'
-	) {		
-		/*$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : '';*/
-		$filter_periodo = $admin_query->query_vars['periodo'];
-			
-		$args	=	array();
-		$args	=	_esc_getArgsPeriodo($args, $filter_periodo);
-
-			$admin_query->set(
-				'date_query',
-				$args['date_query']
-			);
-			/*$admin_query->set(
-				'date_query', // I love date_query appeared in WordPress 3.7!
-				array(
-					'after' => $_GET['mishaDateFrom'], // any strtotime()-acceptable format!
-					'before' => $_GET['mishaDateTo'],
-					'inclusive' => true, // include the selected days as well
-					'column'    => 'post_date' // 'post_modified', 'post_date_gmt', 'post_modified_gmt'
-				)
-			);*/
-		/*_print($admin_query);*/
-
-	}
-
-	return $admin_query;
-
-}
-
-
-function concerts_pre_get_posts( $query ) {
-    if ( !is_admin() )
-        return;
-
-/*_print($query->query_vars);*/
-    if ( isset( $query->query_vars[ 'post_type' ] ) && $query->query_vars[ 'post_type' ] == 'orden' ) {
-        $query->set( 'orderby', 'meta_value' );
-        $query->set( 'order', 'ASC' );
-        $query->set( 'meta_query', array(
-            array(
-                'key' => 'date_value',
-                'value' => date( "Y-m-d" ),
-                'compare' => '<=',
-                'type' => 'DATE'
-            )
-        ) );
-    }
-}
-//add_filter( 'pre_get_posts', 'concerts_pre_get_posts' );
-
-//add_filter( 'posts_request', '_eschb_posts_request');
-function _eschb_posts_request($request){
-	_print($request);
-	return $request;
-}

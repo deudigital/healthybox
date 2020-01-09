@@ -57,11 +57,17 @@ class HB_Plugin {
 		add_filter( 'gettext', array($this, 'remove_lostpassword_text') );
 		add_filter( 'login_link_separator', array($this, '_esc_login_link_separator') );
 		add_filter( 'register', array($this, '_esc_register') );
-		
+
 		add_action('login_head', array($this, '_eschb_blog_favicon'));
+		/*add_action('login_head', array($this, '_eschb_login_head_after_reset_password'));*/
+		add_action( 'after_password_reset', array($this, '_eschb_login_head_after_reset_password' ));
+		
+		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
+		add_action( 'woocommerce_customer_reset_password', 'action_woocommerce_reset_password', 10, 1 );
+		
 		add_action('wp_head', array($this, '_eschb_blog_favicon'));
 		add_action('admin_head', array($this, '_eschb_blog_favicon'));
-		
+		/*add_action( 'admin_enqueue_scripts', 'rv_custom_wp_admin_style_enqueue' );*/
 		add_action( 'register_form', array($this, 'crf_registration_form' ));
 		
 		add_filter( 'registration_redirect', array($this, '_esc_registration_redirect'));
@@ -83,6 +89,7 @@ class HB_Plugin {
 		
 		add_filter( 'editable_roles', array($this, '_eschb_editable_roles') );
 	}
+
 	function _eschb_editable_roles($all_roles ){
 		$healthybox_roles	=	array('cliente','cocina', 'healthybox_servicio_cliente', 'healthybox_manager');
 		$roles	=	array();
@@ -174,27 +181,18 @@ class HB_Plugin {
 		return $redirect_to;
 	}
 	function _esc_login_head(){
-		/*wp_enqueue_script( 'jquery' );
-		wp_localize_script( 'jquery', 'login_ajax_object',array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );*/
-		/*wp_enqueue_script( 'jquery-bs', 'https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js', array('jquery'), true );*/
-		
 		wp_enqueue_style( 'healthybox-gf', 'https://fonts.googleapis.com/css?family=Muli:200,300,400,600,700,800,900&display=swap', array(), '1.0' );
 		wp_enqueue_style( 'healthybox-glbl', plugin_dir_url( __FILE__ ) . 'assets/css/global.css', array(), '1.0' );
 		wp_enqueue_style( 'healthybox-login-css', plugin_dir_url( __FILE__ ) . 'assets/css/login.css', array(), '1.0' );
 		
 		wp_enqueue_script( 'jquery' );
 		wp_localize_script( 'jquery', 'login_ajax_object',array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
-		
-		/*wp_enqueue_script( 'jquery-login', 'https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js', array('jquery'), true );*/
-		wp_enqueue_script('healthybox-login-js', plugin_dir_url( __FILE__ ) . 'assets/js/login.js', array( 'jquery' ), '1.0', true );
-		
+
+		wp_enqueue_script('healthybox-login-js', plugin_dir_url( __FILE__ ) . 'assets/js/login.js', array( 'jquery' ), '1.0', true );	
 		wp_print_scripts();
 		$custom_logo_id = get_theme_mod( 'custom_logo' );
 		$image = wp_get_attachment_image_src( $custom_logo_id , 'full' );
-		/*echo $image[0];*/
 		echo '<style>.login h1 a {background-image:url(' . $image[0] . ');}</style>';
-		//echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-
 	}
 	function _eschb_login_headerurl($login_header_url ){
 		return home_url();
@@ -307,160 +305,81 @@ $args	=	array(
 	}
 	function v_forcelogin() {
 
-			// Exceptions for AJAX, Cron, or WP-CLI requests
-			if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				return;
+		// Exceptions for AJAX, Cron, or WP-CLI requests
+		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+
+		// Redirect unauthorized visitors
+		if ( ! is_user_logged_in() ) {
+			// Get visited URL
+			$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
+			$url .= '://' . $_SERVER['HTTP_HOST'];
+			// port is prepopulated here sometimes
+			if ( strpos( $_SERVER['HTTP_HOST'], ':' ) === FALSE ) {
+				$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
 			}
+			$url .= $_SERVER['REQUEST_URI'];
 
-			// Redirect unauthorized visitors
-			if ( ! is_user_logged_in() ) {
-				// Get visited URL
-				$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
-				$url .= '://' . $_SERVER['HTTP_HOST'];
-				// port is prepopulated here sometimes
-				if ( strpos( $_SERVER['HTTP_HOST'], ':' ) === FALSE ) {
-					$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
-				}
-				$url .= $_SERVER['REQUEST_URI'];
+			/**
+			 * Bypass filters.
+			 *
+			 * @since 3.0.0 The `$whitelist` filter was added.
+			 * @since 4.0.0 The `$bypass` filter was added.
+			 * @since 5.2.0 The `$url` parameter was added.
+			 */
+			$bypass = apply_filters( 'v_forcelogin_bypass', false, $url );
+			$whitelist = apply_filters( 'v_forcelogin_whitelist', array() );
 
-				/**
-				 * Bypass filters.
-				 *
-				 * @since 3.0.0 The `$whitelist` filter was added.
-				 * @since 4.0.0 The `$bypass` filter was added.
-				 * @since 5.2.0 The `$url` parameter was added.
-				 */
-				$bypass = apply_filters( 'v_forcelogin_bypass', false, $url );
-				$whitelist = apply_filters( 'v_forcelogin_whitelist', array() );
-
-				if ( preg_replace( '/\?.*/', '', $url ) !== preg_replace( '/\?.*/', '', wp_login_url() ) && ! $bypass && ! in_array( $url, $whitelist ) ) {
-					// Determine redirect URL
-					$redirect_url = apply_filters( 'v_forcelogin_redirect', $url );
-					// Set the headers to prevent caching
-					nocache_headers();
-					// Redirect
-					wp_safe_redirect( wp_login_url( $redirect_url ), 302 ); exit;
-				}
-			}else{
-				$user	=	wp_get_current_user();
-				$roles	=	( array ) $user->roles;
-				/*if(in_array('cliente', $roles)){
-					wp_redirect(home_url('/', 'http'), 301);
-					exit;
-				}*/
-				if(!is_admin() && !in_array('cliente', $roles)){
-					wp_redirect(admin_url('/', 'http'), 301);
-					exit;
-				}	
+			if ( preg_replace( '/\?.*/', '', $url ) !== preg_replace( '/\?.*/', '', wp_login_url() ) && ! $bypass && ! in_array( $url, $whitelist ) ) {
+				// Determine redirect URL
+				$redirect_url = apply_filters( 'v_forcelogin_redirect', $url );
+				// Set the headers to prevent caching
+				nocache_headers();
+				// Redirect
+				wp_safe_redirect( wp_login_url( $redirect_url ), 302 ); exit;
 			}
-			
-			/*
-			elseif ( function_exists('is_multisite') && is_multisite() ) {
-				// Only allow Multisite users access to their assigned sites
-				if ( ! is_user_member_of_blog() && ! current_user_can('setup_network') ) {
-					wp_die( __( "You're not authorized to access this site.", 'wp-force-login' ), get_option('blogname') . ' &rsaquo; ' . __( "Error", 'wp-force-login' ) );
-				}
+		}else{
+			$user	=	wp_get_current_user();
+			$roles	=	( array ) $user->roles;
+			/*if(in_array('cliente', $roles)){
+				wp_redirect(home_url('/', 'http'), 301);
+				exit;
 			}*/
+			if(!is_admin() && !in_array('cliente', $roles)){
+				wp_redirect(admin_url('/', 'http'), 301);
+				exit;
+			}	
+		}
 	}
-
- 
-	function _esc_admin_enqueue_scripts(){
+	function _eschb_login_head_after_reset_password( $user ){
+		$creds	=	array(
+						'user_login'	=>	$user->user_login, 
+						'user_password'	=>	$_POST['pass1'], 
+						'remember' 		=>	true
+					);
+		$user	=	wp_signon($creds);
+		if ( is_wp_error( $user ) )
+			echo $user ->get_error_message();
 		
-		/*global $rtb_controller;*/
-
-		// Use the page reference in $admin_page_hooks because
-		// it changes in SOME hooks when it is translated.
-		// https://core.trac.wordpress.org/ticket/18857
+		wp_set_current_user( $user->ID, $user->user_login );
+		wp_set_auth_cookie( $user->ID, true, false );
+		wp_redirect( site_url('/pedido/') );
+		exit;
+	}
+	function _esc_admin_enqueue_scripts(){
 		global $admin_page_hooks;
-/*_print('$admin_page_hooks');
-_print($admin_page_hooks);*/
-/*
-[index.php] => dashboard
-[separator1] => separator1
-[upload.php] => media
-[link-manager.php] => links
-[edit-comments.php] => comments
-[edit.php] => posts
-[edit.php?post_type=page] => pages
-[edit.php?post_type=alimento] => alimento
-[edit.php?post_type=orden] => orden
-[edit.php?post_type=cliente] => cliente
-[edit.php?post_type=alianza] => alianza
-[separator2] => separator2
-[themes.php] => appearance
-[plugins.php] => plugins
-[users.php] => users
-[tools.php] => tools
-[options-general.php] => settings
-[separator-last] => separator-last
-[rtb-bookings] => bookings
-[produccion] => comando-produccion
-[empaque] => empaque
-[email-log] => email-log
-*/
 		$screen = get_current_screen();
-/*
-WP_Screen Object
-(
-    [action] => 
-    [base] => toplevel_page_empaque
-    [columns:WP_Screen:private] => 0
-    [id] => toplevel_page_empaque
-    [in_admin:protected] => site
-    [is_network] => 
-    [is_user] => 
-    [parent_base] => 
-    [parent_file] => 
-    [post_type] => 
-    [taxonomy] => 
-    [_help_tabs:WP_Screen:private] => Array
-        (
-        )
-
-    [_help_sidebar:WP_Screen:private] => 
-    [_screen_reader_content:WP_Screen:private] => Array
-        (
-        )
-
-    [_options:WP_Screen:private] => Array
-        (
-            [per_page] => Array
-                (
-                    [label] => Empaque
-                    [default] => 5
-                    [option] => empaques_per_page
-                )
-
-        )
-
-    [_show_screen_options:WP_Screen:private] => 
-    [_screen_settings:WP_Screen:private] => 
-    [is_block_editor] => 
-)
-*/		
+		
+		wp_enqueue_style( 'custom_wp_admin_css', plugin_dir_url( __FILE__ ) . 'assets/css/admin/admin.css', false, '1.0.0' );
+		
 		if ( empty( $screen ) || empty( $admin_page_hooks['empaque'] ) || empty( $admin_page_hooks['produccion'] ) ) {
 			return;
 		}
 
 		if ( $screen->base == 'toplevel_page_empaque' || $screen->base == 'toplevel_page_produccion' ) {
-			/*wp_enqueue_style( 'healthybox-admin', plugins_url('/assets/css/admin/admin.css', __FILE__) );*/
 			wp_enqueue_script( 'healthybox-admin', plugins_url('/assets/js/admin/admin.js', __FILE__), array( 'jquery' ), '', true );
-			/*wp_localize_script(
-				'healthybox-admin',
-				'healthybox',
-				array(
-					'nonce'		=> wp_create_nonce( 'healthybox-admin' ),
-					'strings'	=> array(
-						'add_booking'		=> __( 'Add Booking', 'restaurant-reservations' ),
-						'edit_booking'		=> __( 'Edit Booking', 'restaurant-reservations' ),
-						'error_unspecified'	=> __( 'An unspecified error occurred. Please try again. If the problem persists, try logging out and logging back in.', 'restaurant-reservations' ),
-					),
-					'banned_emails' => preg_split( '/\r\n|\r|\n/', (string) $rtb_controller->settings->get_setting( 'ban-emails' ) ),
-					'banned_ips' => preg_split( '/\r\n|\r|\n/', (string) $rtb_controller->settings->get_setting( 'ban-ips' ) ),
-				)
-			);*/
 		}
-		
 		wp_enqueue_script('quick-edit-script', plugin_dir_url(__FILE__) . 'assets/js/admin/post-quick-edit-script.js', array('jquery','inline-edit-post' ));
 	}
 	function _esc_enqueue_scripts(){
@@ -802,8 +721,12 @@ WP_Screen Object
 				'manage_produccions'		=>	true,
 				'manage_direccions'			=>	true,
 				'manage_healthybox'			=>	true,
-				'manage_users'			=>	true,
+				'manage_users'				=>	true,
 				'create_users'				=>	true,
+				'edit_user'					=>	true,
+				'read_user'         		=>	true, 
+				'delete_user'	     		=>	true, 
+				
 				'edit_users'				=>	true,
 				'delete_users'				=>	true,
 				'list_users'				=>	true,

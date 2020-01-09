@@ -117,14 +117,6 @@ function esc_meta_box_form($post){
 $terms = wp_get_post_terms( $post->ID, array( 'categoria_alimento', 'tipo_plato' ) );
 /*_print($terms);*/
 ?>
-<style>
-
-.esc.form-table th,
-.esc.form-table td {
-    padding: 5px;
-
-}
-</style>
 <table class="form-table esc">
 <tr>
 	<th scope="row"><label for="esc_precio">Precio</label></th>
@@ -258,12 +250,10 @@ function esc_meta_box_cliente($post_id){
 	$_esc_cliente_dieta	=	get_post_meta($post_id, '_esc_cliente_dieta', true);
 	$_old_dieta			=	serialize($_esc_cliente_dieta);
 	$_new_dieta			=	serialize($_POST['dieta']);
-	/*_print($_old_dieta);_print($_new_dieta);*/	
 	if($_new_dieta!=$_old_dieta){
 		update_post_meta($post_id, '_esc_cliente_dieta', $_POST['dieta']);
 		_esc_actualizarDietaEnOrdenesPendientes($post_id);
 	}	
-	/*exit;*/
 }
 add_action('save_post', 'esc_meta_box_cliente');
 function esc_meta_box_cliente_form($post){
@@ -287,70 +277,25 @@ function esc_meta_box_cliente_form($post){
    }
 ?>
 <style>
-/*.form-table.esc {
-	max-width: 60%;
-}*/
-.form-table.esc .fieldset {
-    border: 1px solid #000;
-    padding: 10px;
-	position:relative;
-	margin-top:20px
-	/*line-height:3em;*/
-}
-.form-table.esc .fieldset legend{
-	position:absolute;
-	top:-15px;
-	background-color:#fff;
-	padding:5px;
-	font-weight:700
-}
-.direccion > .dia {
-	margin:10px 0;
-}
-.direccion-entrega {
-    background-color: #eee;
-	padding:15px;
-}
-.direccion-entrega > .dropdowns {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
-}
-.direccion-entrega > .dropdowns .combo:not(:first-child) {
-    padding-left: 30px;
-}
+.fieldset {margin-top:50px;}
+.fieldset legend{font-size:1.5em;}
+.form-table.esc .fieldset {border: 1px solid #000;padding: 10px;position:relative;margin-top:20px}
+.form-table.esc .fieldset legend{position:absolute;top:-15px;background-color:#fff;padding:5px;font-weight:700}
+.form-table.esc label{display: block;margin-top:10px;margin-bottom:5px;}
+.direccion > .dia {margin:10px 0;}
+.direccion-entrega {background-color: #eee;padding:15px;}
+.direccion-entrega > .dropdowns {display: grid;grid-template-columns: 33% 33% 33%;}
+.direccion-entrega > .dropdowns .combo:not(:first-child) {padding-left: 30px;}
 .direccion-entrega > .dropdowns .combo{}
 .direccion-entrega > .dropdowns .combo > select,
-.direccion-entrega > textarea{
-    display: block;
-	width:100%
-}
+.direccion-entrega > textarea{display: block;width:100%}
 
-.form-table.esc label{
-    display: block;
-	margin-top:10px;
-	margin-bottom:5px;
-}
-
-.col {
-    display: inline-block;
-    max-width: 45%;
-    /* background-color: red; */
-    min-width: 400px;
-    width: 100%;
-}
-
-.col.c {
-    /* width: 88%; */
-    max-width: 80%;
-}
+.col {display: inline-block;max-width: 45%;min-width: 400px;width: 100%;}
+.col.c {max-width: 80%;}
 .dieta{max-width:200px}
-.dieta thead th{
-	background-color:#e5e5e5;
-}
+.dieta thead th{background-color:#e5e5e5;}
 .dieta th,
-.dieta td{
-	padding:3px;
-}
+.dieta td{padding:3px;}
 .dieta tr th,
 .dieta tr td{border:1px solid #000;}
 .dieta tbody tr:nth-child(odd) th,
@@ -358,8 +303,6 @@ function esc_meta_box_cliente_form($post){
 .dieta tbody tr th,
 .dieta tbody tr td{padding:10px 5px}
 .dieta input{text-align:center}
-.fieldset {margin-top:50px;}
-.fieldset legend{font-size:1.5em;}
 #direcciones{margin-left:15px}
 @media(min-width:992px){
 	.inner{float:right}
@@ -748,9 +691,9 @@ endforeach;
 		</div>
 	</div>
 </section>
-
 <style>
 body{color:#a2a2a2;}
+.esc-hide{display:none !important}
 .esc-container{font-family: 'Muli', sans-serif;counter-reset: esc_plato;}
 .box-dashed {border: 1px dashed #ccc;padding:30px 15px;position: relative;margin-bottom:15px}
 .box-dashed-title, 
@@ -763,7 +706,6 @@ a.esc-plato-delete {	position: absolute;right: 25px;top: 20px;line-height: 1;tex
 .ingredientes {margin-top: 5px;}
 .title-entrega {text-align: center;font-size: 2em !important;}
 .title-entrega {margin-bottom: 30px !important;}
-.esc-hide{display:none !important}
 .esc-form-group > label {display: block;font-weight:400;margin-bottom:0 !important;}
 .esc-form-group.address{text-align:center;padding:30px 0}
 .esc-form-control{width:100%;height:auto;font-family:inherit;font-size:15px;}
@@ -774,23 +716,11 @@ label.has-error{color:#ed7260}
 .esc-price {font-weight:800;font-size:1.25em;color:#6f6f6f;}
 .has-error:not(label):not(.notfound){border:1px solid #ed7260}
 
-button, [type="button"], [type="reset"], [type="submit"] {
-    -webkit-appearance: button;
-}
-.btn{border-radius: 50px;text-align: center;text-decoration: none;text-transform: uppercase;font-weight: bold;max-width:100%;
-cursor:pointer;
-    transition: background 150ms ease-in-out;
-    border: none;    
-    box-sizing: border-box;
-    color: #fff;
-	}
-
+button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}
+.btn{border-radius: 50px;text-align: center;text-decoration: none;text-transform: uppercase;font-weight: bold;max-width:100%;cursor:pointer;transition: background 150ms ease-in-out;border: none;box-sizing: border-box;color: #fff;}
 .btn {background-color: #ed7260 !important;font-family: inherit;padding: 13px 25px;margin: auto;display: block;outline: none !important;max-width: 100%;}
-
 .resume * {font-family: 'Muli', sans-serif;}
-.resume::before {
-	content: "Subtotal";
-}
+.resume::before {content: "Subtotal";}
 .resume > .table {border: none;max-width:700px;width:100%;font-size:1.5em}
 .resume > .table td, .resume > .table th {border: none;text-align:left;padding: 0;}
 .resume > .table th{font-weight: 700;color:#757575}
@@ -806,78 +736,46 @@ cursor:pointer;
 .table-resumen thead tr th:nth-child(2) {width:90px;}
 .table-resumen thead tr th:last-child {width:90px;}
 
+.table-resumen td, .table-resumen  th {border: none;word-break: break-word;}
 .table-resumen td {line-height:1.25}
 .table-resumen td:nth-child(2) {text-align:right}
-
-
-.table-resumen td, .table-resumen  th {border: none;word-break: break-word;}
 .table-resumen tfoot tr th:first-child {text-align: left;}
 .table-resumen + h4 {font-weight: 900;margin-bottom: 20px !important;}
 .resume.total:before {content: "Total";}
 .table-resumen-plato td{text-align:right}
 
-.opcion-entrega > li {list-style-type: none;}
 .opcion-entrega {}
-.opcion-entrega > li > label {position: relative;padding-left: 23px;overflow:hidden;cursor:pointer;}
-/*.opcion-entrega > li > label span {position: absolute;left: 0;top: 5px;}
-.opcion-entrega > li > label span:before,
-.opcion-entrega > li > label span:after {position:absolute;content:"";display:block;border-radius:50%;}
-.opcion-entrega > li > label span:before {width:18px;height:18px;border:1px solid #6f6f6f;}
-.opcion-entrega > li > label span:after {width:10px;height:10px;margin-left:4px;margin-top:4px;}
-.opcion-entrega > li > label span:after {}*/
-/*.opcion-entrega > li > label input:checked + span:after {background-color:#e47263;}*/
-/*.opcion-entrega > li > label input[type="radio"] {position:absolute;top:-15px;width:auto;height:auto;}*/
-.opcion-entrega > li > label input[value="domicilio"]:not(:checked) ~ .disclaimer {display:none;}
+.opcion-entrega > li {list-style-type: none;}
 .opcion-entrega > li  a {color: #e47263;display:block;}
+.opcion-entrega > li > label {position: relative;padding-left: 23px;overflow:hidden;cursor:pointer;}
+.opcion-entrega > li > label input[value="domicilio"]:not(:checked) ~ .disclaimer {display:none;}
 .disclaimer {background-color: #f3f3f3;font-size: 14px;color: #6f6f6f;font-style: italic;position:absolute}
 input[type=radio]:checked::before {background-color: #e47263;}
 
 .without-dieta .esc-price {text-indent: -9999px;text-align: left;position:relative}
 .without-dieta .esc-price::before {content: "N/A";position: absolute;text-indent: 0;display: block;}
-
 .without-dieta .currency-symbol,
 .without-dieta .resume:not(.total) {display:none;}
 
 @media(min-width:768px){
-	/*.box-dashed {padding: 65px 100px 75px 30px;}*/
 	.tipo-plato {display: grid;grid-template-columns: 40% 60%;}
 	.esc-platos:not(.boxes) .ingredientes {display: grid;grid-template-columns: repeat(3,32.5%);grid-gap: 10px;}
 	.esc-platos:not(.boxes) .tipo-plato .esc-price {text-align: right;padding-top: 35px;}
-	/*.without-dieta .esc-price::before {right: 0;}*/
-	/*.box-dashed-title,
-	.box-dashed:before {top:-25px;}*/
 	a.esc-plato-delete {right: 15px;top: 30px;}
-
 	.box-dashed-title, .box-dashed::before{font-size: 1.25em;top:-15px;margin:0}
-
 	.dropdowns {display: grid;grid-template-columns: 30% 30% 30%;width: 100%;grid-column-gap: 5%;}
-	
-
 	.btn{min-width: 260px;}
 	.opcion-entrega {display: flex;justify-content: center;}
-
 }
 .esc-platos.boxes > .esc-platos-container {display: grid;grid-template-columns: 31% 31% 31%;grid-gap: 3%;width: 100%;}
 .esc-platos.boxes .tipo-plato {display: flex;flex-direction: column-reverse;margin-bottom:15px;}
 .container-button {margin: 15px 0 30px;}
 
-.table-resumen tr.subtotal th, .table-resumen tr.subtotal td {
-    padding-top: 15px;
-    border-top: 1px solid black;
-
-}
-
-
-</style>
-<style>
+.table-resumen tr.subtotal th, .table-resumen tr.subtotal td {padding-top: 15px;border-top: 1px solid #000;}
 .form-table.esc{max-width:100%}
 .form-table.esc tbody tr td {vertical-align: top;}
 .form-table.esc tr th,
-.form-table.esc tr td {
-    border: 1px solid #eee;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
+.form-table.esc tr td {border: 1px solid #eee;padding-top: 10px;padding-bottom: 10px;}
 .form-table.esc tr td:not(:first-child):not(:nth-child(2)){width:30%}
 .capital{text-transform:capitalize;}
 </style>
@@ -927,52 +825,21 @@ function esc_save_meta_box_alimento($post_id){
 		return $post_id;
 	}
 	
-	/*echo '<pre>' . print_r($_POST,true) . '</pre>';exit;*/
-		update_post_meta($post_id, '_esc_alimento_semana', $_POST['esc_alimento_semana']);
-		update_post_meta($post_id, '_esc_alimento_dias', $_POST['esc_alimento_dias']);
-		update_post_meta($post_id, '_esc_alimento_categoria', $_POST['esc_alimento_categoria']);
-		
-		
-		
-		/*
-		update_post_meta($post_id, '_esc_alimento_precio_desayuno', $_POST['esc_alimento_precio_desayuno']);
-		update_post_meta($post_id, '_esc_alimento_precio_almuerzo', $_POST['esc_alimento_precio_almuerzo']);
-		update_post_meta($post_id, '_esc_alimento_precio_cena', $_POST['esc_alimento_precio_cena']);
+	update_post_meta($post_id, '_esc_alimento_semana', $_POST['esc_alimento_semana']);
+	update_post_meta($post_id, '_esc_alimento_dias', $_POST['esc_alimento_dias']);
+	update_post_meta($post_id, '_esc_alimento_categoria', $_POST['esc_alimento_categoria']);
 
-		$precios	=	array(
-							'desayuno'	=>	$_POST['esc_alimento_precio_desayuno'],
-							'almuerzo'	=>	$_POST['esc_alimento_precio_almuerzo'],
-							'cena'	=>	$_POST['esc_alimento_precio_cena'],
-						);
-		update_post_meta($post_id, '_esc_alimento_precios', $precios);*/
-		update_post_meta($post_id, '_esc_alimento_precio', $_POST['esc_alimento_precio']);
-		
-		
-	
+	update_post_meta($post_id, '_esc_alimento_precio', $_POST['esc_alimento_precio']);
+	update_post_meta($post_id, '_esc_alimento_semana_dias', $_POST['esc_alimento_semana_dias']);
 }
 add_action('save_post', 'esc_save_meta_box_alimento');
 function esc_meta_box_alimento_form($post){
 	wp_nonce_field('esc_save_meta_box_alimento', 'esc_save_meta_box_alimento');
-
-	$metas	=	get_post_meta($post->ID);
-	/*_print($metas);*/
-	$_esc_alimento_dias	=	get_post_meta($post->ID, '_esc_alimento_dias', true);
-	
-	$_day_checked['lunes']	=		$_esc_alimento_dias['lunes']? ' checked="checked"':'';
-	$_day_checked['miercoles']	=	$_esc_alimento_dias['miercoles']? ' checked="checked"':'';
-	
-	$_esc_alimento_semana	=	get_post_meta($post->ID, '_esc_alimento_semana', true);
+	/*$metas	=	get_post_meta($post->ID);/*_print($metas);*/
 	$_esc_alimento_semana_dias	=	get_post_meta($post->ID, '_esc_alimento_semana_dias', true);
-	_print($_esc_alimento_semana_dias);
-/*_print($_esc_alimento_semana);*/
-	/*$_week_checked['par']	=	$_esc_alimento_semana=='par'? ' checked="checked"':'';
-	$_week_checked['impar']	=	$_esc_alimento_semana=='impar'? ' checked="checked"':'';*/
-	$_week_checked['par']	=	$_esc_alimento_semana['par']? ' checked="checked"':'';
-	$_week_checked['impar']	=	$_esc_alimento_semana['impar']? ' checked="checked"':'';
-
+	/*_print($_esc_alimento_semana_dias);*/
 	$_esc_alimento_categoria	=	get_post_meta($post->ID, '_esc_alimento_categoria', true);
-	$_esc_alimento_precio	=	get_post_meta($post->ID, '_esc_alimento_precio', true);
-
+	$_esc_alimento_precio		=	get_post_meta($post->ID, '_esc_alimento_precio', true);
 	$_tipos_de_alimento	=	array(
 								'desayuno'	=> 'Desayuno',
 								'almuerzo'	=> 'Almuerzo',
@@ -980,52 +847,39 @@ function esc_meta_box_alimento_form($post){
 							);
 	$_categoria_de_alimento	=	_esc_getCategorias();
 ?>
-<style>
-
-.esc.form-table th,
-.esc.form-table td {
-    padding: 5px;
-vertical-align:text-top;
-}
-.esc.form-table > tbody > tr > th {
-    width: auto;
-}
-.esc.form-table > tbody > tr > th:nth-child(2),
-.esc.form-table > tbody > tr > th:nth-child(3){
-    width: 120px;
-}
-</style>
-<table class="form-table esc">
+<table class="form-table esc alimento-edit">
 <tr>
-	<th scope="row"><label for="esc_alimento_precio">Precio</label></th>
-	<th scope="row"><label for="esc_alimento_semana">Semana</label></th>
-	<th scope="row"><label for="esc_alimento_dias">Dias</label></th>
+	<th scope="row">Precio</th>
+	<th scope="row">Dias</th>
 	<th colspan="3" scope="row">Categoria</th>
 </tr>
 <tr>
 	<td>
 		<input name="esc_alimento_precio" type="number" value="<?php echo  $_esc_alimento_precio ?>" />		
 	</td>
-<?php /*
-	<td>
-		<input name="esc_alimento_semana" type="radio" value="par" <?php echo  $_week_checked['par'] ?> />Par
-		<br>
-		<br>
-		<input name="esc_alimento_semana" type="radio" value="impar" <?php echo  $_week_checked['impar'] ?> />Impar
-	</td>
-*/ ?>
-	<td>
-		<input name="esc_alimento_semana[par]" type="checkbox" value="par" <?php echo  $_week_checked['par'] ?> />Par
-		<br>
-		<br>
-		<input name="esc_alimento_semana[impar]" type="checkbox" value="impar" <?php echo  $_week_checked['impar'] ?> />Impar
-	</td>
-	<td>
-		<input name="esc_alimento_dias[lunes]" type="checkbox" value="lunes" <?php echo  $_day_checked['lunes'] ?> />Lunes
-		<br>
-		<br>
-		<input name="esc_alimento_dias[miercoles]" type="checkbox" value="miercoles" <?php echo  $_day_checked['miercoles'] ?> />Miercoles
-	</td>
+<?php 
+	$_semanas	=	array('par', 'impar');
+	/*$_dias		=	array('lunes', 'miercoles');*/
+	$_dias		=	_esc_get_dias();
+	$html		=	'<td><ul class="asignacion-dias">';
+	foreach($_semanas as $semana){
+		$html	.=	'<li><h3>Semana ' . ucfirst($semana) . '</h3>';
+		foreach($_dias as $dia_id=>$dia_literal){
+			$html	.=	'<label>';
+			$html	.=	'<input name="esc_alimento_semana_dias[' . $semana . '][]" type="checkbox" value="' . $dia_id . '"';
+			if(in_array($dia_id, $_esc_alimento_semana_dias[$semana]))
+				$html	.=	' checked="checked"';
+
+			/*$html	.=	'/>' . ucfirst($dia);*/
+			$html	.=	'/>' . $dia_literal;
+			$html	.=	'</label>';
+		}
+		$html	.=	'</li>';
+	}
+	$html	.=	'</ul></td>';
+	echo $html;
+
+?>
 	<td colspan="3">
 		<table class="form-table">
 <?php
@@ -1076,9 +930,6 @@ function add_categoria_alimento_field($taxonomy) {
 		</li>
 	</ul>
 </div>
-<style>
-.inputs{display:grid;grid-template-columns:31% 31% 31%;grid-gap:10px;}
-</style>
 <?php
 }
 add_action( 'created_categoria_alimento', 'save_feature_meta', 10, 2 );

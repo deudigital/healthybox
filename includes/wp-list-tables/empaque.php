@@ -46,16 +46,14 @@ class Empaque_List extends WP_List_Table {
 		$resumen	=	array();
 		$empaques	=	array();
 		foreach($ordenes as $key=>$orden){
-			$pedido		=	get_post_meta($orden->ID, '_esc_orden_args', true);/*_print($pedido);*/
+			$pedido		=	get_post_meta($orden->ID, '_esc_orden_args', true);
 			$cliente_id	=	get_post_meta($orden->ID, '_esc_orden_cliente_id', true);
 			$cliente	=	 _esc_getFullnameOfCliente($cliente_id);
 			if(!empty($filter_dia))
 				$pedido	=	array($filter_dia=>$pedido[$filter_dia]);
 
 			$paquetes=	array();
-			foreach($pedido as $dia=>$data){
-				
-				/*foreach($data['platos'] as $cat=>$plato){*/
+			foreach($pedido as $dia=>$data){				
 				$__platos	=	array();
 				foreach($data['platos'] as $_key=>$plato){
 					$__plato	=	array();
@@ -74,10 +72,8 @@ class Empaque_List extends WP_List_Table {
 							}
 						}
 					}
-					/*$paquetes[$dia][]	=	$__plato;*/
-					/*$__platos[]	=	$__plato;*/
 					$__platos[$plato['tipo']][$_key]	=	$__plato;
-				}				
+				}
 				$paquetes[$dia]	=	$__platos;
 			}
 			$empaques[]	=	array(
@@ -86,29 +82,22 @@ class Empaque_List extends WP_List_Table {
 									'orden'	=>	$orden->ID,
 									);
 		}
-		/*_print($empaques);*/
-		/*global $resumen;*/
-		/*$result	=	$ordenes;*/
-		
 		$ids	=	implode(',', array_keys($resumen));
-	   $alimentos = get_posts( array(
-								'include'   => $ids,
-								'post_type' => 'alimento',
-								'orderby'   => 'post__in',
-							) );
-		/*$result	=	$alimentos;*/
+		$alimentos = get_posts( array(
+									'include'   => $ids,
+									'post_type' => 'alimento',
+									'orderby'   => 'post__in',
+								) );
 		$result	=	array();
 		foreach($empaques as $key=>$empaque){
 			$row	=	array();
-			/*$row['empaques']	=	$empaques['paquetes'];*/
 			$row['empaques']	=	$empaque;
 			$result[]	=	$row;
 		}
-		/*_print($result);*/
+		global $_esc_result_count;
+		$_esc_result_count	=	count($result);
 		return $result;
 	}
-
-
 	/**
 	 * Delete a customer record.
 	 *
@@ -131,6 +120,9 @@ class Empaque_List extends WP_List_Table {
 	 * @return null|string
 	 */
 	public static function record_count() {
+		global $_esc_result_count;
+		return $_esc_result_count;
+		
 		global $wpdb;
 /*/
 		_print($wpdb);
@@ -176,51 +168,11 @@ class Empaque_List extends WP_List_Table {
 				$data	=	$item[ $column_name ];
 				
 				$empaquetados	=	get_post_meta($data['orden'], '_esc_orden_empaquetado_args', true);
-				/*_print($empaquetados);*/
-				/*_print($data['paquetes']);*/
 				$html	=	'<h3 class="cliente">' . $data['cliente'] . '</h3>';
 				$html	.=	'<table class="wp-list-table empaques">';
-				foreach($data['paquetes'] as $dia=>$____plato){/*_print($empaque);*/
-				
+				foreach($data['paquetes'] as $dia=>$____plato){
 					$html_plato	=	'';
-					/*foreach($____plato as $tipo=>$empaque){
-						$html	.=	'<tr>';
-						$html	.=		'<td class="actions">' . $dia . '</td>';
-						$html	.=		'<td>';
-						foreach($empaque as $__key=>$platos){
-							$empaquetado	=	'';
-							$checked	=	'';
-							if(in_array($__key, $empaquetados)){
-								$checked	=	' checked="checked"';
-								$empaquetado	=	' empaquetado';
-							}
-							$html	.=	'<ul class="platos' . $empaquetado . '">';
-							$html	.=		'<li>';
-							$html	.=			'<input type="checkbox" data-orden="' . $data['orden'] . '" class="toggle-estado-empaquetado" value="' . $__key . '"' . $checked . '>';
-							$html	.=		'</li>';
-							$html	.=		'<li>';
-							$html	.=			'<img width="25" src="' . ESCHB_URL . '/assets/images/icons/50/calendar-' . $dia . '.png" class="img-empaquetado">';
-							$html	.=			'<br>';
-							$html	.=			'<img width="25" src="' . ESCHB_URL . '/assets/images/icons/50/tiempo-' . $tipo . '.png" class="img-empaquetado">';
-							$html	.=		'</li>';
-							foreach($platos as $ekey=>$plato){
-
-								$html	.=	'<li class="plato">';
-								$html	.=		'<div class="categoria">' . $plato['cat_nombre'] . '</div>';
-								$html	.=		'<div class="dieta">' . $plato['dieta'] . '</div>';
-								$html	.=		'<div class="alimento">' . $plato['alimento_nombre'] . '</div>';
-								$html	.=	'</li>';
-							}
-							$html	.=	'</ul>';
-						}
-						$html	.=		'</td>';
-						$html	.=	'</tr>';
-					}*/
-					
 					foreach($____plato as $tipo=>$empaque){
-						/*$html_plato	.=	'<tr>';
-						$html_plato	.=		'<td class="actions">' . $dia . '</td>';
-						$html_plato	.=		'<td>';*/
 						foreach($empaque as $__key=>$platos){
 							$empaquetado	=	'';
 							$checked	=	'';
@@ -249,42 +201,15 @@ class Empaque_List extends WP_List_Table {
 							}
 							$html_plato	.=	'</ul>';
 						}
-						/*$html_plato	.=		'</td>';
-						$html_plato	.=	'</tr>';*/
 					}
 					$html	.=	'<tr>';
 					$html	.=		'<td class="actions">' . $dia . '</td>';
 					$html	.=		'<td>';
 					$html	.=	$html_plato;
 					$html	.=		'</td>';
-					$html	.=	'</tr>';
-					
+					$html	.=	'</tr>';					
 				}
 				$html	.=	'</table>';
-				$html	.=	'<style>';
-				$html	.=	'.cliente {text-align:center;}';
-				$html	.=	'.wp-list-table.widefat.empaques > tbody > tr:nth-child(even) {background-color: #f5f5f5;}';
-				$html	.=	'.wp-list-table.empaques tr td.actions {line-height: 2.5em;}';
-				$html	.=	'.wp-list-table.empaques {display: table;}';
-				$html	.=	'.wp-list-table.empaques td {width: 50%;vertical-align: middle;}';
-				$html	.=	'.wp-list-table.empaques tr  td.actions {width: 10%;}';
-				/*$html	.=	'.wp-list-table.empaques tr td:nth-child(1) {width: 5%;}';
-				$html	.=	'.wp-list-table.empaques tr td:nth-child(2) {width: 5%;}';*/
-				$html	.=	'.wp-list-table.empaques ul {margin: 15px 0;display: flex;}';
-				$html	.=	'.wp-list-table.empaques ul > li{position:relative;}';
-				$html	.=	'.wp-list-table.empaques ul > li > input {position: absolute;top: 50%;left:-20px}';
-				$html	.=	'.wp-list-table.empaques ul > li:nth-child(2) {display: flex;line-height: 1;text-align: center;flex-direction: column;align-self: center;padding: 0 15px;}';
-				$html	.=	'ul.platos.empaquetado {color: #bbb;}';
-				$html	.=	'.plato {border: 1px solid #f1f1f1;display: table-cell;vertical-align: top;margin:0 1%}';
-				$html	.=	'ul:not(.empaquetado) .plato {border: 1px solid rgba(150, 182, 84, 0.5);}';
-				$html	.=	'.plato >  div {padding: 5px;text-align: center;max-width: 100%;width: 120px;min-height:19px;}';
-				$html	.=	'ul.empaquetado .plato > .categoria {background-color: #f1f1f1;}';
-				$html	.=	'ul.empaquetado .plato > .dieta {background-color: #f5f5f5;}';
-				$html	.=	'ul:not(.empaquetado) .plato > .categoria {background-color: rgba(150, 182, 84, 0.25);}';
-				$html	.=	'ul:not(.empaquetado).plato > .dieta {background-color: rgba(150, 182, 84, 0.15);}';
-				$html	.=	'.plato > .alimento {line-height: 1.2em;text-align:left;font-size:0.9em}';
-				$html	.=	'input.toggle-estado-empaquetado:checked + span {position: absolute;content: "";top: 0;width: 25px;height: 25px;display: block;background: url(' . ESCHB_URL . 'assets/images/icons/50/check.png) no-repeat center center #fff;left: 0;background-size: cover;}';
-				$html	.=	'</style>';
 				return $html;
 				break;
 			default:
@@ -373,21 +298,18 @@ class Empaque_List extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$user_search_key = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
-		$categoria_alimento = isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
-		$dia = isset( $_REQUEST['dia'] ) ? wp_unslash( trim( $_REQUEST['dia'] ) ) : '';
-		$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
-		/*_print($_REQUEST);*/
+		$user_search_key	=	isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		$categoria_alimento =	isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
+		$filter_dia			=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+		$filter_periodo		=	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
 		$this->_column_headers = $this->get_column_info();
-
 		/** Process bulk action */
 		$this->process_bulk_action();
-		
+
 		// filter the data in case of a search.
 		if( $user_search_key ) {
 			$table_data = $this->filter_table_data( $table_data, $user_search_key );
 		}
-		
 
 		$per_page     = $this->get_items_per_page( 'comandoProduccion_per_page', 5 );
 		$current_page = $this->get_pagenum();
@@ -398,7 +320,7 @@ class Empaque_List extends WP_List_Table {
 			'per_page'    => $per_page //WE have to determine how many items to show on a page
 		] );
 
-		$this->items = self::get_empaques( $per_page, $current_page, $categoria_alimento, $dia, $filter_periodo );
+		$this->items = self::get_empaques( $per_page, $current_page, $categoria_alimento, $filter_dia, $filter_periodo );
 	}
 
 	public function filter_box( $text, $input_id ) {
@@ -412,40 +334,14 @@ class Empaque_List extends WP_List_Table {
 		$categorias_plato = get_categories($args);
 		$_aCategorias	=	array();
 		
-		$filter_cat = isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
-		$filter_dia = isset( $_REQUEST['dia'] ) ? wp_unslash( trim( $_REQUEST['dia'] ) ) : '';
-		$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
+		$filter_cat 	=	isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
+		$filter_dia		=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+		$filter_periodo =	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
 
 		$html	=	'';
 		$html	.=	_esc_filterPeriodos( $filter_periodo );
-		$html	.=	'<p class="search-box">';
-		$html	.=		'<label for="dia">D&iacute;a de entrega</label>';
-		$html	.=		'<select name="dia" onchange="this.form.submit()">';
-		$html	.=			'<option value="">Todos</option>';
-		$html	.=			'<option value="lunes"' . ($filter_dia=='lunes'? ' selected="selected"':''  ). '>Lunes</option>';
-		$html	.=			'<option value="miercoles"' . ($filter_dia=='miercoles'? ' selected="selected"':''  ). '>Miercoles</option>';
-		$html	.=		'</select>';
-		$html	.=	'</p>';
-		/*$html	.=	'<p class="search-box">';
-		$html	.=		'<label for="categoria_alimento">Categoria</label>';
-		$html	.=		'<select name="categoria_alimento" onchange="this.form.submit()">';
-		$html	.=			'<option value="">Todos</option>';
-		foreach($categorias_plato as $key=>$taxonomy){
-			$selected	=	'';
-			if($taxonomy->slug==$filter_cat)
-				$selected	=	' selected="selected"';
-			$html	.=	'<option value="' . $taxonomy->slug .'"' . $selected . '>' . $taxonomy->name . '</option>';
-		}
-		$html	.=		'</select>';
-		$html	.=	'</p>';*/
-		/*echo '<p class="search-box">' . $html . '</p>';*/
+		$html	.=	_esc_filterDia($filter_dia);
 		echo $html;
-		echo '<style>';
-		echo 'p.search-box{margin:5px 10px;min-width:150px}';
-		echo 'p.search-box label{display:block}';
-		echo 'p.search-box select{width:100%;max-width:100%}';
-		echo '</style>';
-
 /*?>
 <p class="search-box">
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
