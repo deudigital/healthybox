@@ -17,19 +17,14 @@ jQuery(function($){
  
 		//if post id exists
 		if ( id > 0 ) {
- 
 			// add rows to variables
 			var specific_post_edit_row = $( '#edit-' + id ),
 			    specific_post_row = $( '#post-' + id ),
 			    product_price = $( '.column-estado', specific_post_row ).find('span').data('status');
-			    /*featured_product = false; // let's say by default checkbox is unchecked*/
- 
-			// check if the Featured Product column says Yes
-			/*if( $( '.column-featured', specific_post_row ).text() == 'Yes' ) featured_product = true;*/
  
 			// populate the inputs with column data
 			$( ':input[name="esc_orden_status"]', specific_post_edit_row ).val( product_price );
-			/*$( ':input[name="featured"]', specific_post_edit_row ).prop('checked', featured_product );*/
+			/*$('#cliente-sin-dieta').addClass('text-red')*/
 		}
 	}
 });

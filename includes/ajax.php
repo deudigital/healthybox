@@ -74,7 +74,15 @@ function _esc_ajax_import(){
 	_esc_import();
 	wp_die();
 }
-
+add_action( 'wp_ajax_export', '_esc_ajax_export' );
+function _esc_ajax_export(){
+	/*check_ajax_referer( 'get_data', 'security' );*/	
+	$filter_categoria	=	isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
+	$filter_dia			=	isset( $_REQUEST['dia'] ) ? wp_unslash( trim( $_REQUEST['dia'] ) ) : '';
+	$filter_periodo		=	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
+	_esc_export($filter_categoria, $filter_dia, $filter_periodo);
+	wp_die();
+}
 add_action( 'wp_ajax_set_plato_empaquetado', '_esc_set_plato_empaquetado' );
 function _esc_set_plato_empaquetado(){
 	$plato_id	=	$_REQUEST['plato_id'];

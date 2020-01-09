@@ -76,14 +76,22 @@ class ComandoProduccion_List extends WP_List_Table {
 								'post_type' => 'alimento',
 								'orderby'   => 'post__in',
 							) );
+		$nro	=	1;
 		foreach($alimentos	as $key=>$alimento){
+			if($resumen[$alimento->ID]['count']==0)
+				continue;
+			
 			$row	=	array();
-			$row['nro']	=	($key+1);
+			/*$row['nro']	=	($key+1);*/
+			$row['nro']		=	$nro;
 			/*$row['title']	=	$alimento->ID . ': ' . $alimento->post_title;*/
 			$row['title']	=	$alimento->post_title;
 			$row['porciones']	=	$resumen[$alimento->ID]['count'];
 			$result[]	=	$row;
+			$nro++;
 		}
+		global $_esc_result_count;
+		$_esc_result_count	=	count($result);
 		return $result;
 	}
 
@@ -110,6 +118,9 @@ class ComandoProduccion_List extends WP_List_Table {
 	 * @return null|string
 	 */
 	public static function record_count() {
+		global $_esc_result_count;
+		return $_esc_result_count;
+		
 		/*_print('record_count');*/
 		global $wpdb;
 		if($wpdb->num_rows==0)
@@ -240,7 +251,29 @@ class ComandoProduccion_List extends WP_List_Table {
 		return $actions;
 	}
 
-
+public function extra_tablenav( $which ) {
+		if($which=='top'){
+			$filter_categoria	=	isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
+			$filter_dia			=	isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
+			$filter_periodo		=	isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
+		
+			$filter	=	'<div class="direccion-entrega">';
+			$filter	.=		'<button type="button" id="exportar-excel" class="button">Exportar</button>';
+			$filter	.=	'</div>';
+			$filter	.=	'<script>';
+			$filter	.=	'jQuery(document).ready(function(){';
+			$filter	.=	'jQuery("#exportar-excel").on("click", function(){';
+			$filter	.=	'window.location= ajaxurl + "?action=export';
+			$filter	.=	'&categoria_alimento=' . $filter_categoria;
+			$filter	.=	'&dia=' . $filter_dia;
+			$filter	.=	'&periodo=' . $filter_periodo;
+			$filter	.=	'"';
+			$filter	.=	'});';
+			$filter	.=	'});';
+			$filter	.=	'</script>';
+			echo $filter;		
+		}			
+	}
 	/**
 	 * Handles data query and filter, sorting, and pagination.
 	 */
@@ -248,11 +281,11 @@ class ComandoProduccion_List extends WP_List_Table {
 
 		$user_search_key = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
 		$categoria_alimento = isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
-		$dia = isset( $_REQUEST['dia'] ) ? wp_unslash( trim( $_REQUEST['dia'] ) ) : '';
+		$filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
 		$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
 		/*_print($_REQUEST);*/
 		$this->_column_headers = $this->get_column_info();
-		$items = self::get_comandoProduccion( $per_page, $current_page, $categoria_alimento, $dia, $filter_periodo );
+		$items = self::get_comandoProduccion( $per_page, $current_page, $categoria_alimento, $filter_dia, $filter_periodo );
 
 		/** Process bulk action */
 		$this->process_bulk_action();
@@ -263,7 +296,7 @@ class ComandoProduccion_List extends WP_List_Table {
 		}
 		
 
-		$per_page     = $this->get_items_per_page( 'comandoProduccion_per_page', 5 );
+		$per_page     = 1000;/*$this->get_items_per_page( 'comandoProduccion_per_page', 5 );*/
 		$current_page = $this->get_pagenum();
 		$total_items  = self::record_count();
 
@@ -291,28 +324,12 @@ class ComandoProduccion_List extends WP_List_Table {
 		$_aCategorias	=	array();
 		
 		$filter_cat = isset( $_REQUEST['categoria_alimento'] ) ? wp_unslash( trim( $_REQUEST['categoria_alimento'] ) ) : '';
-		$filter_dia = isset( $_REQUEST['dia'] ) ? wp_unslash( trim( $_REQUEST['dia'] ) ) : '';
+		$filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
 		$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
 
-		/*$periodos	=	_esc_getPeriodos();*/
-
-		/*$html	=	'';
-		$html	.=		'<label for="dia">Periodo</label>';
-		$html	.=	'<select name="periodo" onchange="this.form.submit()">';
-		$html	.=	'<option value="">Periodo</option>';
-		foreach($periodos as $key=>$periodo){
-			$selected	=	'';
-			if($key==$filter_periodo)
-				$selected	=	' selected="selected"';
-			$html	.=	'<option value="' . $key .'"' . $selected . '>' . $key .':' . $periodo['jueves'] . ' - ' . $periodo['miercoles'] . '</option>';
-		}
-		$html	.=	'</select>';*/
-
 		$html	.=	_esc_filterPeriodos( $filter_periodo );
-
-		
-/*		echo '<p class="search-box">' . $html . '</p>';*/
-		/*$html	=	'';*/
+		$html	.=	_esc_filterDia($filter_dia);
+/*
 		$html	.=	'<p class="search-box">';
 		$html	.=		'<label for="dia">D&iacute;a de entrega</label>';
 		$html	.=		'<select name="dia" onchange="this.form.submit()">';
@@ -321,8 +338,9 @@ class ComandoProduccion_List extends WP_List_Table {
 		$html	.=			'<option value="miercoles"' . ($filter_dia=='miercoles'? ' selected="selected"':''  ). '>Miercoles</option>';
 		$html	.=		'</select>';
 		$html	.=	'</p>';
+*/
 		$html	.=	'<p class="search-box">';
-		$html	.=		'<label for="categoria_alimento">Categoria</label>';
+		$html	.=		'<label for="categoria_alimento">Categor&iacute;a</label>';
 		$html	.=		'<select name="categoria_alimento" onchange="this.form.submit()">';
 		$html	.=			'<option value="">Todos</option>';
 		foreach($categorias_plato as $key=>$taxonomy){
@@ -334,11 +352,6 @@ class ComandoProduccion_List extends WP_List_Table {
 		$html	.=		'</select>';
 		$html	.=	'</p>';
 		echo $html;
-		echo '<style>';
-		echo 'p.search-box{margin:5px 10px;min-width:150px}';
-		echo 'p.search-box label{display:block}';
-		echo 'p.search-box select{width:100%;max-width:100%}';
-		echo '</style>';
 
 /*?>
 <p class="search-box">

@@ -70,10 +70,6 @@ function _esc_form_dieta($cliente_dieta=array(), $echo=true, $disableCatWithNoAl
 	}
 ob_start();
 ?>
-<style>
-.esc.form-table th,
-.esc.form-table td {padding: 5px;}
-</style>
 <table class="form-table table dieta">
 <?php
 $col_th	=	'';
@@ -223,7 +219,8 @@ var _distritos= [];
 				_select.html('').append(option);				
 				jQuery.each(_cantones_de_provincia, function(key, canton){
 					let _value	=	canton.codigo_canton;
-					let _text	=	canton.codigo_provincia + '-'+ canton.codigo_canton + ':'+ canton.nombre_canton;
+					/*let _text	=	canton.codigo_provincia + '-'+ canton.codigo_canton + ':'+ canton.nombre_canton;*/
+					let _text	=	canton.nombre_canton;
 					option = new Option(_text, _value);
 					_select.append(option);
 				});
@@ -249,7 +246,8 @@ var _distritos= [];
 				_select.html('').append(option);				
 				jQuery.each(_distritos_de_canton, function(key, distrito){
 					let _value	=	distrito.codigo_distrito;
-					let _text	=	distrito.codigo_provincia + '-'+ distrito.codigo_canton + '-'+ distrito.codigo_distrito + ':'+ distrito.nombre_distrito;
+					/*let _text	=	distrito.codigo_provincia + '-'+ distrito.codigo_canton + '-'+ distrito.codigo_distrito + ':'+ distrito.nombre_distrito;*/
+					let _text	=	distrito.nombre_distrito;
 					option = new Option(_text, _value);
 					_select.append(option);
 				});
@@ -272,7 +270,8 @@ var _distritos= [];
 				_select.html('').append(option);				
 				jQuery.each(_provincias, function(key, provincia){
 					let _value	=	provincia.codigo_provincia;
-					let _text	=	provincia.codigo_provincia + ':'+ provincia.nombre_provincia;
+					/*let _text	=	provincia.codigo_provincia + ':'+ provincia.nombre_provincia;*/
+					let _text	=	provincia.nombre_provincia;
 					option = new Option(_text, _value);
 					_select.append(option);
 				});				
@@ -386,6 +385,45 @@ endif;
 
 </div>
 <?php 	
+}
+
+function _esc_export($filter_categoria='', $filter_dia='', $filter_periodo=''){
+	/*_print(func_get_args());*/
+	$ccsve_generate_value_arr_new	=	_esc_getComandoProduccion( $filter_categoria, $filter_dia, $filter_periodo );
+	$titulos	=	array('Nro', 'Plato', 'Porciones');
+	array_unshift($ccsve_generate_value_arr_new,$titulos);
+
+	$filename = 'produccion';
+	if(!empty($filter_periodo)){
+		$periodos	=	_esc_getPeriodos();		
+		$filename	.=	'-' . $periodos[$filter_periodo]['jueves']->format('dMY') . '_' . $periodos[$filter_periodo]['miercoles']->format('dMY');
+	}
+
+	if(!empty($filter_dia))
+		$filename .= '-' . $filter_dia;
+
+	if(!empty($filter_categoria))
+		$filename .= '-' . $filter_categoria;
+	
+	$filename .= '.xls';
+
+	ob_start();
+	foreach($ccsve_generate_value_arr_new as $data) {
+		$data_string = implode("\t", array_map('utf8_decode', array_values($data)));
+		echo $data_string . "\r\n";
+	}
+	$response	=	 ob_get_clean();	
+	header('Content-Encoding: UTF-8');
+	/*header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');*/
+    /*header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8' );*/
+	header("Content-Type: Application/vnd.ms-excel; charset=utf-8");
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header('Content-Description: File Transfer');
+	header("Content-Disposition: Attachment; Filename=\"$filename\"");
+	header("Expires: 0");
+	header("Pragma: public");
+	echo $response;
+	exit;
 }
 function _esc_import(){
 	ob_start();
@@ -776,7 +814,7 @@ function _esc_getEstadosOrder(){
 	return	array(
 					'pendiente'			=>	'Pendiente',
 					'aprobado'			=>	'Aprobado',
-					'cliente_sin_dieta'	=>	'Cliente sin dieta',
+					/*'cliente_sin_dieta'	=>	'Cliente sin dieta',*/
 				);
 }
 function _eschb_getTiemposComida(){
@@ -1328,11 +1366,76 @@ function _esc_parImpar($date=false, $output='result'){
 	return $return;
 }
 
+function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_periodo='' ) {
+	$args = array(
+					'post_type'   	=>	'orden',
+					'numberposts'	=>	- 1,
+					'meta_query'	=>	array(
+											array(
+												'key'   => '_esc_orden_status',
+												'value' => 'aprobado',
+											)
+										)
+				);
+	$args	=	_esc_getArgsPeriodo($args, $filter_periodo);/*_print($args);exit;*/
+	$ordenes = get_posts( $args );
+	$resumen	=	array();
+	foreach($ordenes as $key=>$orden){
+		$pedido			=	get_post_meta($orden->ID, '_esc_orden_args', true);		
+		if(!empty($filter_dia))
+			$pedido	=	array($pedido[$filter_dia]);
+
+		foreach($pedido as $dia=>$data){
+			/*_print($data);*/
+			foreach($data['platos'] as $cat=>$plato){
+				foreach($plato as $cat=>$alimento){
+					if($cat!='tipo' && !empty($alimento['alimento_id'])){
+						if($cat==$filter_cat || empty($filter_cat )){
+							/*_print($alimento);*/
+							/*$resumen[$alimento['alimento_id']]	=	$resumen[$alimento['alimento_id']] + $alimento['dieta'];*/
+							$count	=	$resumen[$alimento['alimento_id']]['count'];
+							$count	+=	$alimento['dieta'];
+
+
+							$resumen[$alimento['alimento_id']]	=	array(
+																		'count'	=>	$count,
+																		'cat'	=>	$cat,
+																		'dia'	=>	$dia,
+																		'dieta'	=>	$alimento['dieta']
+																	);
+						}							
+					}
+				}
+			}
+		}
+	}
+	if(count($resumen)==0)
+		return array();
+
+	$result	=	array();
+	$ids	=	implode(',', array_keys($resumen));
+   $alimentos = get_posts( array(
+							'include'   => $ids,
+							'post_type' => 'alimento',
+							'orderby'   => 'post__in',
+						) );
+	foreach($alimentos	as $key=>$alimento){
+		$row	=	array();
+		$row['nro']	=	($key+1);
+		/*$row['title']	=	$alimento->ID . ': ' . $alimento->post_title;*/
+		$row['title']	=	$alimento->post_title;
+		$row['porciones']	=	$resumen[$alimento->ID]['count'];
+		$result[]	=	$row;
+	}
+	return $result;
+}
+
+
 function _esc_filterDia($filter_dia=''){
 	$dias	=	_esc_get_dias();
 	$html	=	'<p class="search-box">';
 	/*if(!$hide_label)*/
-		$html	.=		'<label for="filter_dia">D&iacute;a</label>';
+		$html	.=		'<label for="filter_dia">D&iacute;a de Entrega</label>';
 
 	$html	.=		'<select name="filter_dia" onchange="this.form.submit()">';
 	$html	.=			'<option value="">Todos</option>';
@@ -1392,14 +1495,12 @@ function _esc_filterPeriodos($filter_periodo='', $hide_label=false){
 		$html	.=		'<label for="periodo">Periodo</label>';
 
 	$html	.=		'<select name="periodo" onchange="this.form.submit()">';
-	/*$html	.=			'<option value="">Todos</option>';*/
 	foreach($periodos as $key=>$periodo){
 		$selected	=	'';
 		if($key==$filter_periodo)
 			$selected	=	' selected="selected"';
-		/*$html	.=	'<option value="' . $key .'"' . $selected . '>' . $key .': ' . $periodo['jueves'] . '-' . $periodo['miercoles'] . '</option>';*/
+
 		$html	.=	'<option value="' . $key .'"' . $selected . '>' . $key .': ' . $periodo['jueves']->format('d/m/Y') . '-' . $periodo['miercoles']->format('d/m/Y') . '</option>';
-		/*$html	.=	'<option value="' . $key .'"' . $selected . '>' . $periodo['jueves']->format('d M, Y') . ' - ' . $periodo['miercoles']->format('d M, Y') . '</option>';*/
 	}
 	$html	.=		'</select>';
 	$html	.=	'</p>';

@@ -225,8 +225,8 @@ function resizeJquerySteps(container=''){
 				}			
 				jQuery.each(_data.alimentos[dia][tipo][ele], function(key, alimento){
 					let _value	=	alimento.alimento_id;
-					let _text	=	alimento.alimento_id + ':'+ alimento.alimento_title;
-					/*let _text	=	alimento.alimento_title;*/
+					/*let _text	=	alimento.alimento_id + ':'+ alimento.alimento_title;*/
+					let _text	=	alimento.alimento_title;
 					option = new Option(_text, _value);
 					_select.append(option);
 				});
