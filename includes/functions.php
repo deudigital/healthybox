@@ -1,7 +1,6 @@
 <?php	
 if ( !defined('ABSPATH') )
     die ( 'No direct script access allowed' );
-
 function _print($data){
 	echo '<pre>' . print_r($data,true) . '</pre>';
 }
@@ -32,8 +31,6 @@ a:2:{s:8:"almuerzo";a:1:{i:0;s:7:"harinas";}s:4:"cena";a:1:{i:0;s:7:"harinas";}}
 			);
 			$alimentos = get_posts( $args );
 			$result[$tiempo_id][$categoria_id]	=	count($alimentos);
-			
-			
 			/*$result	=	array();
 			foreach($alimentos as $alimento){
 				$row	=	array();
@@ -46,7 +43,6 @@ a:2:{s:8:"almuerzo";a:1:{i:0;s:7:"harinas";}s:4:"cena";a:1:{i:0;s:7:"harinas";}}
 	/*_print($alimentos);*/
 	/*_print($result);*/
 	return $result;
-	
 }
 function _esc_form_dieta($cliente_dieta=array(), $echo=true, $disableCatWithNoAlimentos=true){
 	$matriz_dieta	=	_eschb_getInfoAlimentosForDietaForm();
@@ -63,7 +59,6 @@ function _esc_form_dieta($cliente_dieta=array(), $echo=true, $disableCatWithNoAl
 		   );
 	$categorias_alimento = get_categories($args);
 	$_categoria_de_plato	=	array();
-
 	foreach($categorias_alimento as $key=>$categoria){
 		$term_id = absint( $categoria->term_id );
 		$_categoria_de_plato[$categoria->slug]	=	$categoria->name;
@@ -96,8 +91,6 @@ if($_tipos_de_plato){
 	}
 	echo '</tbody>';
 }
-
-	
 ?>
 </table>
 <script>
@@ -123,7 +116,6 @@ function _esc_form_entrega_platos( $args = '' ) {
 		'button_save'		=>	false,
 		'copy_from_monday'	=>	false
 	);
-
 	$parsed_args = wp_parse_args( $args, $defaults );
 	$dias	=	array(
 					'lunes'	=>	'Lunes',
@@ -167,33 +159,26 @@ var _distritos= [];
 		if(_this.is(':checked')){
 			var _options	=	jQuery('#container-address-lunes select.provincia:first > option').clone();
 			var _val	=	jQuery('#container-address-lunes select.provincia:first').val();
-
 			var _select	=	jQuery('#container-address-miercoles select.provincia:first');
 			_select.html('');
 			_select.append(_options);
 			_select.val(_val);
-
 			_options	=	jQuery('#container-address-lunes select.canton:first > option').clone();
 			_val	=	jQuery('#container-address-lunes select.canton:first').val();
-
 			_select	=	jQuery('#container-address-miercoles select.canton:first');
 			_select.html('');
 			_select.append(_options);
 			_select.val(_val);
-			
 			_options	=	jQuery('#container-address-lunes select.distrito:first > option').clone();
 			_val	=	jQuery('#container-address-lunes select.distrito:first').val();
-
 			_select	=	jQuery('#container-address-miercoles select.distrito:first');
 			_select.html('');
 			_select.append(_options);
 			_select.val(_val);
-			
 			_val=	jQuery('#container-address-lunes .detalles:first').val();
 			_select	=	jQuery('#container-address-miercoles .detalles:first');
 			_select.html('');
 			_select.val(_val);			
-
 		}
 	}
 	function _esc_setDefaultValues(){
@@ -212,7 +197,6 @@ var _distritos= [];
 			var option = new Option('Loading...', '');
 			_select	=	jQuery(this);
 			_select.html('').append(option);
-			
 			const _cantones_de_provincia = _cantones.filter(x => x.codigo_provincia==provincia_id);
 			if(_cantones_de_provincia){
 				option = new Option('-- Seleccionar --', '');
@@ -239,7 +223,6 @@ var _distritos= [];
 			var option = new Option('Loading...', '');
 			_select	=	jQuery(this);
 			_select.html('').append(option);
-			
 			const _distritos_de_canton = _distritos.filter(x => x.codigo_provincia==provincia_id && x.codigo_canton==canton_id);
 			if(_distritos_de_canton){
 				option = new Option('-- Seleccionar --', '');
@@ -264,7 +247,6 @@ var _distritos= [];
 			var option = new Option('Loading...', '');
 			_select	=	jQuery(this);
 			_select.html('').append(option);
-
 			if(_provincias){
 				option = new Option('-- Seleccionar --', '');
 				_select.html('').append(option);				
@@ -337,7 +319,6 @@ foreach($dias as $key=>$dia){
 	<div id="container-address-<?php echo $key ?>" class="direccion">
 		<h4 class="dia"><?php echo $dia?></h4>
 <?php
-
 if($key=='miercoles' && $parsed_args['copy_from_monday'] === true)	:
 ?>
 <label for="same-address-monday" class="copy-address">
@@ -368,7 +349,7 @@ endif;
 					</select>
 				</div>
 			</div>
-			<label>Detalles</label>
+			<label>Detalles/Dirección</label>
 			<textarea name="direccion[<?php echo $key ?>][detalles]" class="detalles regular-text"><?php echo $parsed_args['values'][$key]['detalles'] ?></textarea>
 		</div>
 	</div>
@@ -382,31 +363,24 @@ if($parsed_args['button_save'] === true)	:
 <?php
 endif;
 ?>
-
 </div>
 <?php 	
 }
-
 function _esc_export($filter_categoria='', $filter_dia='', $filter_periodo=''){
 	/*_print(func_get_args());*/
 	$ccsve_generate_value_arr_new	=	_esc_getComandoProduccion( $filter_categoria, $filter_dia, $filter_periodo );
 	$titulos	=	array('Nro', 'Plato', 'Porciones');
 	array_unshift($ccsve_generate_value_arr_new,$titulos);
-
 	$filename = 'produccion';
 	if(!empty($filter_periodo)){
 		$periodos	=	_esc_getPeriodos();		
 		$filename	.=	'-' . $periodos[$filter_periodo]['jueves']->format('dMY') . '_' . $periodos[$filter_periodo]['miercoles']->format('dMY');
 	}
-
 	if(!empty($filter_dia))
 		$filename .= '-' . $filter_dia;
-
 	if(!empty($filter_categoria))
 		$filename .= '-' . $filter_categoria;
-	
 	$filename .= '.xls';
-
 	ob_start();
 	foreach($ccsve_generate_value_arr_new as $data) {
 		$data_string = implode("\t", array_map('utf8_decode', array_values($data)));
@@ -429,9 +403,7 @@ function _esc_import(){
 	ob_start();
 	$datafile = file( dirname(__FILE__) . '/alimentos_csv_testing.csv' );
 	$i=0;
-	
 	$insertados	=	array();	
-	
 	foreach ($datafile as $key => $line) {
 		/*if($i>1) return ;*/
 		if ( !empty( $line ) && $key>0 ) {
@@ -457,13 +429,11 @@ function _esc_import(){
 				$dias['lunes']	=	'yes';
 			if(!empty($row[3]))
 				$dias['miercoles']	=	'yes';
-					
 			$semanas	=	array();
 			if(!empty($row[7])){
 				$week	=	sanitize_title($row[7]);
 				$semanas[ $week ]	=	'yes';
 			}
-			
 			$week	=	sanitize_title($row[7]);
 			$semana_p_i_dias	=	array();
 			if(!empty($row[2])){
@@ -474,27 +444,22 @@ function _esc_import(){
 			//	$semana_p_i_dias[$week]['miercoles']	=	'yes';
 				$semana_p_i_dias[$week][]	=	'miercoles';
 			}			
-			
 			if(isset($insertados[$row[0]])){
 				$_post_id	=	$insertados[$row[0]];
 				$days	=	get_post_meta($_post_id, '_esc_alimento_dias', true);
 				$days_updated	=	array_merge($days, $dias);
 				update_post_meta($_post_id, '_esc_alimento_dias', $days_updated);
-				
 				$weeks	=	get_post_meta($_post_id, '_esc_alimento_semana', true);
 				$weeks_updated	=	array_merge($weeks, $semanas);
 				update_post_meta($_post_id, '_esc_alimento_semana', $weeks_updated);
-				
 				$week_p_i_days	=	get_post_meta($_post_id, '_esc_alimento_semana_dias', true);
 				_print('---');
 				_print($week_p_i_days);
 				_print($semana_p_i_dias);
-				
 				foreach($semana_p_i_dias[$week] as $day){					
 					if(!in_array($day,$week_p_i_days[$week]))					
 						$week_p_i_days[$week][]	=	$day;
 				}
-					
 				/*$week_p_i_days_updated	=	array_merge($week_p_i_days, $semana_p_i_dias);*/
 				/*$week_p_i_days[$week]	=	array_merge($week_p_i_days[$week], $semana_p_i_dias[$week]);*/
 				//$week_p_i_days[$week]	=	($week_p_i_days[$week]) + ($semana_p_i_dias[$week]);
@@ -503,7 +468,6 @@ function _esc_import(){
 				_print('---------------------');
 				_print('---');
 				update_post_meta($_post_id, '_esc_alimento_semana_dias', $week_p_i_days);
-
 			}else{
 				$post_data = array(
 					'post_title'   => utf8_encode($row[0]),
@@ -534,9 +498,7 @@ function _esc_import__old__(){
 	ob_start();
 	$datafile = file( dirname(__FILE__) . '/alimentos_csv_testing.csv' );
 	$i=0;
-	
 	$insertados	=	array();	
-	
 	foreach ($datafile as $key => $line) {
 		/*if($i>1) return ;*/
 		if ( !empty( $line ) && $key>0) {
@@ -562,19 +524,16 @@ function _esc_import__old__(){
 				$dias['lunes']	=	'yes';
 			if(!empty($row[3]))
 				$dias['miercoles']	=	'yes';
-					
 			$semanas	=	array();
 			if(!empty($row[7])){
 				$week	=	sanitize_title($row[7]);
 				$semanas[ $week ]	=	'yes';
 			}
-			
 			if(isset($insertados[$row[0]])){
 				$_post_id	=	$insertados[$row[0]];
 				$days	=	get_post_meta($_post_id, '_esc_alimento_dias', true);
 				$days_updated	=	array_merge($days, $dias);
 				update_post_meta($_post_id, '_esc_alimento_dias', $days_updated);
-				
 				$weeks	=	get_post_meta($_post_id, '_esc_alimento_semana', true);
 				$weeks_updated	=	array_merge($weeks, $semanas);
 				update_post_meta($_post_id, '_esc_alimento_semana', $weeks_updated);
@@ -634,7 +593,6 @@ function _esc_import_old(){
 				$dias['lunes']	=	'yes';
 			if(!empty($row[3]))
 				$dias['miercoles']	=	'yes';
-
 			$post_data = array(
 				'post_title'   => utf8_encode($row[0]),
 				'post_status'  => 'publish',
@@ -652,11 +610,36 @@ function _esc_import_old(){
 				_print($post_data);
 			}else
 				_print('post_id: ' . $post_id);
-				
 			echo ob_get_clean();
 		}
 		$i++;
 	}
+}
+function _esc_changeWeekParImpar(){
+	$array	=	array(
+					'par'	=>	'impar',
+					'impar'	=>	'par'
+				);
+	$args = array(
+		'post_type'   	=>	'alimento',
+		'meta_key'   	=>	'_esc_alimento_semana_dias',
+		'numberposts'	=>	-1		
+	);
+	$alimentos = get_posts( $args );
+	/*_print(count($alimentos));/*wp_die('fin');*/
+	foreach($alimentos as $alimento){
+		$_esc_alimento_semana_dias	=	get_post_meta($alimento->ID, '_esc_alimento_semana_dias', true);
+		_print('----- ' . $alimento->ID . ' -----');
+		_print($_esc_alimento_semana_dias);
+		$_new_data	=	array();
+		foreach($_esc_alimento_semana_dias as $key=>$dias){			
+			$_new_data[$array[$key]]	=	$dias;
+		}
+		_print('Changed');
+		_print($_new_data);
+		update_post_meta($alimento->ID, '_esc_alimento_semana_dias', $_new_data);
+	}
+	wp_die();
 }
 function _esc_getAlimentos($date=false, $week=''){
 	if(empty($week))
@@ -665,7 +648,6 @@ function _esc_getAlimentos($date=false, $week=''){
 		$week_par_impar['result']	=	$week;
 /*_print($week_par_impar);*/
 /*exit;*/
-
 $array_values[]	=	$week_par_impar['result'];
 	$args = array(
 		'post_type'   	=>	'alimento',
@@ -691,7 +673,6 @@ $array_values[]	=	$week_par_impar['result'];
 	/*_print($alimentos);*/
 	global $wpdb;
 /*_print($wpdb);exit;*/
-
 // Print last SQL query string
 /*_print($wpdb->last_query);*/
 // Print last SQL query result
@@ -714,17 +695,13 @@ $array_values[]	=	$week_par_impar['result'];
 		/*_print($_esc_alimento_semana_dias);*/
 		$_week	=	$_esc_alimento_semana_dias[$week_par_impar['result']];
 		/*_print($_week);*/
-		
 		$_esc_alimento_dias	=	implode(', ', $_week);
-		
 		$_esc_alimento_categoria	=	get_post_meta($alimento->ID, '_esc_alimento_categoria', true);
 		$_esc_alimento_precio		=	get_post_meta($alimento->ID, '_esc_alimento_precio', true);
-
 		/*453$_esc_alimento_precio_desayuno	=	get_post_meta($alimento->ID, '_esc_alimento_precio_desayuno', true);
 		$_esc_alimento_precio_almuerzo	=	get_post_meta($alimento->ID, '_esc_alimento_precio_almuerzo', true);
 		$_esc_alimento_precio_cena		=	get_post_meta($alimento->ID, '_esc_alimento_precio_cena', true);
 		$_esc_alimento_precios			=	get_post_meta($alimento->ID, '_esc_alimento_precios', true);*/
-
 		foreach($_esc_alimento_categoria as $tiempo=>$categorias){
 			/*foreach($categorias as $cat){
 				$res[$tiempo][$cat][]	=	array(
@@ -741,26 +718,19 @@ $array_values[]	=	$week_par_impar['result'];
 													'alimento_precio'	=>	$_esc_alimento_precio,
 													'alimento_dias'		=>	$_esc_alimento_dias
 												);
-				
 				/*if(isset($_esc_alimento_dias['lunes']))
 					$res['lunes'][$tiempo][$cat][]	=	$__alimento;*/
-				
 				if(in_array('lunes', $_week))
 					$res['lunes'][$tiempo][$cat][]	=	$__alimento;
-				
-				
 				/*if(isset($_esc_alimento_dias['miercoles']))
 					$res['miercoles'][$tiempo][$cat][]	=	$__alimento;*/
-
 				if(in_array('miercoles', $_week))
 					$res['miercoles'][$tiempo][$cat][]	=	$__alimento;
-
 			}
 		}
 		/*_print($res);*/
 		/*if(isset($_esc_alimento_dias['lunes']))
 			$result['lunes']	=	$res;
-
 		if(isset($_esc_alimento_dias['miercoles']))
 			$result['miercoles']=	$res;*/
 	}
@@ -807,7 +777,6 @@ function _esc_getAlimentosFromOrdenArgs($data){
 	$alimentos	=	array();
 	foreach($posts as $key=>$_post)
 		$alimentos[$_post->ID]	=	$_post->post_title;
-	
 	return $alimentos;	
 }
 function _esc_getEstadosOrder(){
@@ -837,7 +806,6 @@ function _esc_getClienteData($cliente_id){
 	$cliente = get_post( $cliente_id );
 	$_dieta				=	get_post_meta($cliente->ID, '_esc_cliente_dieta', true);
 	$_direccion			=	get_post_meta($cliente->ID, '_esc_cliente_direccion', true);
-	
 	return array(
 					'id'		=>	$cliente_id,
 					'dieta'		=>	$_dieta,
@@ -869,14 +837,12 @@ function _esc_clienteTieneDieta($cliente_id){
 		count(array_filter($dieta['almuerzo'])) == 0 && 
 		count(array_filter($dieta['cena'])) == 0 )
 		$tieneDieta	=	false;
-
 	return $tieneDieta;
 }
 function _esc_getFullnameOfCliente($cliente_id){
 	$cliente = get_post( $cliente_id );
 	if($cliente)
 		return $cliente->post_title;
-
 	$user_id	=	get_post_meta( $cliente_id, '_esc_cliente_user_id', true );
 	$user_meta 	=	get_user_meta( $user_id );/*_print($user_meta);*/
 	$fullname	=	trim($user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0]);
@@ -905,9 +871,7 @@ function _esc_actualizarDietaEnOrdenesPendientes($cliente_id){
 	$dias	=	_esc_get_dias();
 	$_clienteData	=	_esc_getClienteData($cliente_id);
 	/*_print($_clienteData);*/
-	
 	global $ordenes_actualizadas;
-	
 	foreach($ordenes as $orden){
 		$_new_args	=	array();
 		$args	=	get_post_meta($orden->ID, '_esc_orden_args', true);
@@ -940,14 +904,11 @@ function _esc_getDireccionFormatted($direccion){
 	$sql .= "WHERE codigo_provincia='{$direccion['provincia']}' and ";
 	$sql .= "codigo_canton='{$direccion['canton']}' and ";
 	$sql .= "codigo_distrito='{$direccion['distrito']}'";
-
 	$address	=	$wpdb->get_row( $sql );
-
 	$_direccion[]	=	$direccion['detalles'];
 	$_direccion[]	=	$address->nombre_distrito;
 	$_direccion[]	=	$address->nombre_canton;
 	$_direccion[]	=	$address->nombre_provincia;
-	
 	return implode(', ', $_direccion);
 }
 function _esc_getDireccionesFormateadas($direcciones){
@@ -959,8 +920,6 @@ function _esc_getDireccionesFormateadas($direcciones){
 }
 function _esc_processSubmittedFormPedido($_SUBMITTED){
 	/*_print($_SUBMITTED);*/
-	
-	
 	$editing	=	false;
 	$args = array(
                'taxonomy' => 'categoria_alimento',
@@ -975,11 +934,8 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 		$user_id		=	get_current_user_id();	
 		$_clienteData	=	_esc_getClienteOfUser($user_id);
 	}
-	
 	$clienteConDietaAsignada	=	_esc_clienteTieneDieta($_clienteData['id']);
-
 	$direcciones	=	_esc_getDireccionesFormateadas($_clienteData['direccion']);
-	
 	$_categorias		=	_esc_getCategorias();
 	$categorias_plato	=	get_categories($args);
 	$dias	=	_esc_get_dias();
@@ -1008,9 +964,13 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 				}else
 					$array[$key]	=	'';
 			}
-			$_array_key	=	time() + $index_key;
-			$array_days[$_array_key]	=	$array;
-			$index_key++;
+/*_print('$array');
+_print($array);*/
+			if(!empty($array['tipo'])){
+				$_array_key	=	time() + $index_key;
+				$array_days[$_array_key]	=	$array;
+				$index_key++;
+			}
 		}
 		$form_data_platos[$dkey]['platos']	=	$array_days;		
 		$entrega	=	array(
@@ -1019,7 +979,6 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 						);
 		$form_data_platos[$dkey]['entrega']	=	$entrega;
 	}
-	
 	$ids	=	implode(',', $selected_ids);
 	$posts = get_posts( array(
 							'include'   => $ids,
@@ -1029,17 +988,14 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 	$alimentos	=	array();
 	foreach($posts as $key=>$_post_alimento)
 		$alimentos[$_post_alimento->ID]	=	$_post_alimento->post_title;
-
 	$style['th']	=	'border-bottom:1px solid #000;padding:5px;background-color:#f1f1f1';
 	$style['tbody_td']	=	'border:1px solid #f5f5f5;border-bottom-color:#333;padding:15px;';
 	$style['tfoot_td']	=	'padding:15px;';
-	
 	$html	=	'';
 	$html_new_email	=	'';
 	$html_resumen	=	'<div style="border:1px dashed #ccc;padding: 50px 30px 30px;position: relative;margin-top: 50px;">';
 	$html_resumen	.=	'<h2 style="position:absolute;top:-50px;background-color:#fff;padding:15px;margin-left:-15px;">Resumen</h2>';
 	$html_resumen	.=	'<table style="border-collapse:collapse;color:#757575;max-width:300px;margin:50px auto;width:100%">';
-
 	$html_resumen	.=	'<thead>';
 	$html_resumen	.=	'<tr>';
 	$html_resumen	.=		'<th style="' . $style['th'] . '">Dia</th>';
@@ -1047,12 +1003,10 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 	$html_resumen	.=	'</tr>';
 	$html_resumen	.=	'</thead>';
 	$html_resumen	.=	'<tbody>';
-	
 	$thead	=	'<thead>';
 	$thead	.=	'<tr>';
 	$thead	.=		'<th style="' . $style['th'] . '">#</th>';
 	$thead	.=		'<th style="' . $style['th'] . '">Tipo</th>';
-
 	foreach($_categorias as $key=>$taxonomy){
 		$thead	.=		'<th style="' . $style['th'] . '">' . $taxonomy['name'] . '</th>';
 	}
@@ -1060,10 +1014,11 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 	$thead	.=	'</tr>';
 	$thead	.=	'</thead>';
 	$total	=	0;
-	
 	$fecha_mensaje	=	_esc_getPeriodoEntregaPedido();
-	
 	foreach($form_data_platos as $dia=>$data){
+		if(count($data['platos'])==0)
+			continue ;
+
 		$html	.=	'<div style="border:1px dashed #ccc;padding: 50px 30px 30px;position: relative;margin-top: 50px;">';
 		$html	.=	'<h2 style="position:absolute;top:-50px;background-color:#fff;padding:15px;margin-left:-15px;">' . $dias[$dia] . '</h2>';
 		$html	.=	'<table style="border-collapse:collapse;color:#757575;max-width:100%">';
@@ -1073,17 +1028,15 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 		$html_resumen	.=	'<tr>';
 		$html_resumen	.=	'<td style="' . $style['tbody_td'] . '">' . $dias[$dia] . '</td>';
 		$plato_num	=	1;
-		
 		$html_new_email	.=	_esc_emailHeadLine('Entrega ' . $fecha_mensaje[$dia]);
-		
-		
+/*_print($dia);
+_print($data);*/
 		foreach($data['platos'] as $key=>$plato){
-			
+/*_print($plato);*/
 			$html	.=	'<tr>';
 			$html	.=	'<td style="' . $style['tbody_td'] . '">Plato ' . $plato_num . '</td>';
 			$monto	=	0;
 			$items	=	'';
-			
 			foreach($plato as $cat=>$alimento){
 				if($cat=='tipo')
 					$html	.=	'<td style="' . $style['tbody_td'] . '">' . ucfirst($alimento) . '</td>';
@@ -1093,22 +1046,18 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 					$cantidad	=	empty($alimento)? 0:1;
 					if($alimento['dieta'])
 						$cantidad	=	$alimento['dieta'];
-					
 					/*if($alimento['precios']['alimento'])
 						$monto +=	$alimento['precios']['alimento'] * $cantidad;
 					else
 						$monto +=	$alimento['precios']['cat'] * $cantidad;
 					*/
-					
 					$precio	=	0;
 					if($alimento['precios']['alimento'])
 						$precio	=	$alimento['precios']['alimento'];
 					else
 						$precio	=	$alimento['precios']['cat'];
-					
 					$precio_plato	=	$precio * $cantidad;
 					$monto +=	$precio_plato;
-					
 					$html	.=	'<td style="' . $style['tbody_td'] . '">';
 /*
 * Mostrar calculo por alimento
@@ -1116,7 +1065,6 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 					$html	.=	'<small>(' . $cantidad . 'x' . $precio . '=</small><strong>' . $precio_plato . '</strong>)<br>';
 					$html	.=	$alimento['alimento_id'] . ':';
 */
-
 					if(!empty($alimento['alimento_id']))
 						$items	.=	'<tr><td style="font-family: \'Open sans\', Arial, sans-serif; color:#7f8c8d; font-size:13px; line-height: 20px;">- ' . stripslashes($alimentos[$alimento['alimento_id']]) . '</td></tr>';
 					$html	.=	stripslashes($alimentos[$alimento['alimento_id']]);
@@ -1129,12 +1077,8 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 				$html	.=	'<td style="' . $style['tbody_td'] . '">' . number_format($monto) . '</td>';
 			}else
 				$html	.=	'<td style="' . $style['tbody_td'] . '">N/A</td>';
-
 			$html	.=	'</tr>';
-			
-			
 			$html_new_email	.=	_esc_emailPlato('Plato ' . $plato_num, $plato['tipo'], $items, $_monto);
-			
 			$subtotal	+=	$monto;
 			$plato_num++;
 		}
@@ -1144,10 +1088,7 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 		else
 			$html_resumen	.=	'<th style="' . $style['tbody_td'] . '">N/A</th>';
 		$html_resumen	.=	'</tr>';
-		
-		
 		$html_new_email	.=	_esc_emailEntrega(number_format($data['entrega']['precio']) , $direcciones[$dia]);
-		
 		$total	+=	$subtotal;
 		$html	.=	'<tr>';
 		$html	.=	'<td style="' . $style['tbody_td'] . '" colspan="' . (count($_categorias)+2). '">Entrega: <strong>' . ucfirst($data['entrega']['opcion']) . '</strong></td>';
@@ -1171,46 +1112,35 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 	$html_resumen	.=	'<tfoot>';
 	$html_resumen	.=	'<tr>';
 	$html_resumen	.=	'<td style="' . $style['tfoot_td'] . '">Total</td>';
-	
 	$_total	=	'N/A';
-	
 	if($clienteConDietaAsignada){
 		$_total	=	number_format($total);
 		$html_resumen	.=	'<th style="' . $style['tfoot_td'] . '">' . number_format($total) . '</th>';
 	}else
 		$html_resumen	.=	'<th style="' . $style['tfoot_td'] . '">N/A</th>';
-	
 	$html_resumen	.=	'</tr>';
 	$html_resumen	.=	'</tfoot>';
 	$html_resumen	.=	'</table>';
 	$html_resumen	.=	'</div>';
 	$html	.=	$html_resumen;
-	
 	$html_new_email	.=	_esc_emailTotal( $_total );
-
 	$email	=	file_get_contents(ESCHB_URL . '/includes/emails/orden_email.html');
 	/*echo $email;exit;*/
 	$html_new_email	=	str_replace('{{__CONTENT__}}', $html_new_email, $email);
-		
-		
 	/*echo $html;*/
 	/*echo $html_new_email;*/
 	/*_print($form_data_platos);
 	exit;*/
-
-
 	$_esc_cliente_correo			=	get_post_meta($_clienteData['id'], '_esc_cliente_correo', true);
 	$to	=	$_esc_cliente_correo;/*_print($_esc_cliente_correo);*/
 	$headers[] = 'From: Healthy Box <info@healthybox.deudigital.com>';
 	$headers[] = 'Cc: Danilo Mata <danilo@deudigital.com>';
-	$headers[] = 'Bcc: jaime@solutionswebonline.com';
+	$headers[] = 'Bcc: servicioalcliente@gruposng.com,jaime@solutionswebonline.com';
 	$message	.=	$html_new_email;
 	add_filter('wp_mail_content_type', function( $content_type ) {
 		return 'text/html';
 	});
-	
 	date_default_timezone_set('America/Halifax');
-
 	if($editing){
 		update_post_meta($_SUBMITTED['post_ID'], '_esc_orden_args', $form_data_platos);
 		wp_mail( $to, 'Se ha Actualizado tu Orden', $message, $headers );
@@ -1232,7 +1162,6 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 		wp_redirect( home_url('/gracias') );
 		exit;
 	}
-	
 }
 function _esc_getPeriodoEntregaPedido(){
 /*
@@ -1248,7 +1177,6 @@ function _esc_getPeriodoEntregaPedido(){
 	$_next_wednesday	=	clone $_next_thursday;
 	$_next_monday->modify('next monday');
 	$_next_wednesday->modify('next wednesday');
-
 	$meses	=	array('Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
 	$date	=	$_next_monday->format('d m Y');
 	$date	=	explode(' ', $date);
@@ -1278,12 +1206,10 @@ function _esc_getPeriodos(){
 							'jueves'	=>	$period_start,
 							'miercoles'	=>	$period_end
 						);
-		
 		$period_end	=	clone $period_start;
 		$period_end->modify('-1 day');
 		$period_start	=	clone $period_end;
 		$period_start->modify('previous thursday');
-	
 		$periodos['anterior']	=	array(
 							'jueves'	=>	$period_start,
 							'miercoles'	=>	$period_end
@@ -1292,17 +1218,14 @@ function _esc_getPeriodos(){
 		$period_start	=	new DateTime('previous thursday');
 		$period_end	=	clone $period_start;
 		$period_end->modify('next wednesday');
-				
 		$periodos['actual']	=	array(
 							'jueves'	=>	$period_start,
 							'miercoles'	=>	$period_end
 						);
-		
 		$period_end	=	clone $period_start;
 		$period_end->modify('-1 day');
 		$period_start	=	clone $period_end;
 		$period_start->modify('previous thursday');
-	
 		$periodos['anterior']	=	array(
 							'jueves'	=>	$period_start,
 							'miercoles'	=>	$period_end
@@ -1310,7 +1233,6 @@ function _esc_getPeriodos(){
 	}
 	/*_print($periodos);*/
 	return $periodos;
-	
 }
 function _esc_parImpar($date=false, $output='result'){
 	if($date){
@@ -1319,7 +1241,6 @@ function _esc_parImpar($date=false, $output='result'){
 		$date	=	new DateTime();
 		$weekNumber	=	$date->format('W');
 	}
-	
 	$daynumber	=	$date->format('N');
 	/*_print('$daynumber: ' . $daynumber);*/
 	if( $daynumber != 4 ){
@@ -1331,10 +1252,7 @@ function _esc_parImpar($date=false, $output='result'){
 	$week_par_impar	=	'impar';
 	if($weekNumber%2==0)
 		$week_par_impar	=	'par';
-	
 	/*_print('$week_par_impar: ' . $week_par_impar);*/
-	
-	
 	$return	=	array(
 					'result'		=>	$week_par_impar,
 					'num_dia'	=>	intval($daynumber),
@@ -1344,12 +1262,10 @@ function _esc_parImpar($date=false, $output='result'){
 										'num_semana'	=>	intval($weekNumber),
 									)
 				);
-	
 	global $_parImpar;
 	$_parImpar	=	$return;
 	if($output=='result')
 		return	$week_par_impar;
-	
 	/*
 	if($output=='result')
 		$return =	$week_par_impar;
@@ -1361,11 +1277,9 @@ function _esc_parImpar($date=false, $output='result'){
 					'day_number'	=>	$daynumber,
 				);
 	}*/
-	
 	/*return $week_par_impar;*/
 	return $return;
 }
-
 function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_periodo='' ) {
 	$args = array(
 					'post_type'   	=>	'orden',
@@ -1384,7 +1298,6 @@ function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_peri
 		$pedido			=	get_post_meta($orden->ID, '_esc_orden_args', true);		
 		if(!empty($filter_dia))
 			$pedido	=	array($pedido[$filter_dia]);
-
 		foreach($pedido as $dia=>$data){
 			/*_print($data);*/
 			foreach($data['platos'] as $cat=>$plato){
@@ -1395,8 +1308,6 @@ function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_peri
 							/*$resumen[$alimento['alimento_id']]	=	$resumen[$alimento['alimento_id']] + $alimento['dieta'];*/
 							$count	=	$resumen[$alimento['alimento_id']]['count'];
 							$count	+=	$alimento['dieta'];
-
-
 							$resumen[$alimento['alimento_id']]	=	array(
 																		'count'	=>	$count,
 																		'cat'	=>	$cat,
@@ -1411,7 +1322,6 @@ function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_peri
 	}
 	if(count($resumen)==0)
 		return array();
-
 	$result	=	array();
 	$ids	=	implode(',', array_keys($resumen));
    $alimentos = get_posts( array(
@@ -1429,14 +1339,11 @@ function _esc_getComandoProduccion( $filter_cat='', $filter_dia='', $filter_peri
 	}
 	return $result;
 }
-
-
 function _esc_filterDia($filter_dia=''){
 	$dias	=	_esc_get_dias();
 	$html	=	'<p class="search-box">';
 	/*if(!$hide_label)*/
 		$html	.=		'<label for="filter_dia">D&iacute;a de Entrega</label>';
-
 	$html	.=		'<select name="filter_dia" onchange="this.form.submit()">';
 	$html	.=			'<option value="">Todos</option>';
 	foreach($dias as $key=>$dia){
@@ -1457,7 +1364,6 @@ function _esc_filterSemana($filter_semana=''){
 	$html	=	'<p class="search-box">';
 	/*if(!$hide_label)*/
 		$html	.=		'<label for="filter_semana">Semana</label>';
-
 	$html	.=		'<select name="filter_semana" onchange="this.form.submit()">';
 	$html	.=			'<option value="">Todos</option>';
 	foreach($semanas as $key=>$semana){
@@ -1475,7 +1381,6 @@ function _esc_filterCategoriasAlimento($filter_categoria_alimento=''){
 	$html	=	'<p class="search-box">';
 	if(!$hide_label)
 		$html	.=		'<label for="filter_categoria_alimento">Categor&iacute;a</label>';
-
 	$html	.=		'<select name="filter_categoria_alimento" onchange="this.form.submit()">';
 	$html	.=			'<option value="">Todos</option>';
 	foreach($categorias as $key=>$taxonomy){
@@ -1488,18 +1393,48 @@ function _esc_filterCategoriasAlimento($filter_categoria_alimento=''){
 	$html	.=	'</p>';
 	return $html;
 }
-function _esc_filterPeriodos($filter_periodo='', $hide_label=false){
+
+function _esc_filterPeriodos($filter_periodo='', $args=array() ) {
+    $defaults = array (
+        'actual'	=>	'',
+        'anterior'	=>	''
+    );
+    // Parse incoming $args into an array and merge it with $defaults
+    $args = wp_parse_args( $args, $defaults );
+	
+	
 	$periodos	=	_esc_getPeriodos();
 	$html	=	'<p class="search-box">';
 	if(!$hide_label)
 		$html	.=		'<label for="periodo">Periodo</label>';
-
 	$html	.=		'<select name="periodo" onchange="this.form.submit()">';
 	foreach($periodos as $key=>$periodo){
 		$selected	=	'';
 		if($key==$filter_periodo)
 			$selected	=	' selected="selected"';
-
+		
+		$html	.=	'<option value="' . $key .'"' . $selected . '>';
+		if(empty($args[$key]))
+			$html	.=	$key .': ' . $periodo['jueves']->format('d/m/Y') . '-' . $periodo['miercoles']->format('d/m/Y');
+		else
+			$html	.=	$args[$key];
+		
+		$html	.=	'</option>';
+	}
+	$html	.=		'</select>';
+	$html	.=	'</p>';
+	return $html;
+}
+function _esc_filterPeriodos__original($filter_periodo='', $hide_label=false){
+	$periodos	=	_esc_getPeriodos();
+	$html	=	'<p class="search-box">';
+	if(!$hide_label)
+		$html	.=		'<label for="periodo">Periodo</label>';
+	$html	.=		'<select name="periodo" onchange="this.form.submit()">';
+	foreach($periodos as $key=>$periodo){
+		$selected	=	'';
+		if($key==$filter_periodo)
+			$selected	=	' selected="selected"';
 		$html	.=	'<option value="' . $key .'"' . $selected . '>' . $key .': ' . $periodo['jueves']->format('d/m/Y') . '-' . $periodo['miercoles']->format('d/m/Y') . '</option>';
 	}
 	$html	.=		'</select>';
@@ -1509,9 +1444,7 @@ function _esc_filterPeriodos($filter_periodo='', $hide_label=false){
 function _esc_getArgsPeriodo($args, $filter_periodo){
 	if(!empty($filter_periodo)){
 		$periodos	=	_esc_getPeriodos();
-		
 		$filter_periodo	=	$periodos[$filter_periodo]['jueves']->getTimestamp();
-		
 		$fecha	=	new DateTime();
 		$fecha->setTimestamp($filter_periodo);
 		/*
@@ -1526,7 +1459,6 @@ function _esc_getArgsPeriodo($args, $filter_periodo){
 		*/
 		$fecha->modify('next wednesday + 1 day');
 		$date_end	=	$fecha->format('Y-m-d');
-
 		$args['date_query']	=	array(
 							'column'=>	'post_date',
 							'after'	=>	$date_from,
@@ -1547,15 +1479,12 @@ function _esc_filterEstadosOrden($filter_estado_orden='', $hide_label=false){
 		$checked	=	'';
 		if($filter_estado_orden==$key)
 			$checked	=	' selected="selected"';
-		
 		$html	.=		'<option value="' . $key . '"' . $checked .'>' . $estado . '</option>';
-					
 	endforeach;
 	$html	.=	'</select>';
 	$html	.=	'</p>';
 	echo $html;
 }
-
 function _esc_emailHeadLine($dia_entrega_literal){
 	ob_start();
 ?>
@@ -1638,7 +1567,6 @@ function _esc_emailHeadLine($dia_entrega_literal){
 <?php 
 	return ob_get_clean();
 }
-
 function _esc_emailPlato($plato, $tiempo, $items, $monto){
 	ob_start();
 ?>
@@ -1652,7 +1580,6 @@ function _esc_emailPlato($plato, $tiempo, $items, $monto){
                 <tr>
                   <td bgcolor="#FFFFFF" align="center">
                     <table align="center" border="0" cellpadding="0" cellspacing="0">
-                      
                       <tr>
                         <td align="center" style="text-align:center;vertical-align:top;font-size:0;">
                           <!--right-->
@@ -1676,7 +1603,6 @@ function _esc_emailPlato($plato, $tiempo, $items, $monto){
                                     <tr>
                                       <td height="10"></td>
                                     </tr>
-                                  
                                     <tr>
                                       <td height="20"></td>
                                     </tr>
@@ -1715,7 +1641,6 @@ function _esc_emailEntrega($precio, $direccion){
                 <tr>
                   <td bgcolor="#FFFFFF" align="center">
                     <table width="90%" border="0" align="center" cellpadding="0" cellspacing="0">
-                      
                       <tr>
                         <td style="border-radius:6px;" bgcolor="#f8f8f8" align="center">
                           <table class="table-inner" align="center" width="90%" border="0" cellspacing="0" cellpadding="0">
@@ -1729,7 +1654,6 @@ function _esc_emailEntrega($precio, $direccion){
                                 </tr>
                                 <tr>
                               <td height="15"></td>
-							  
                             </tr>
 							<?php if($precio)	: ?>
                                 <tr >
@@ -1815,7 +1739,6 @@ function _esc_emailTotal($total){
                     </td>
                     <td align="center" style="text-align:center;vertical-align:top;font-size:0;">
                     <![endif]-->
-                          
                         </td>
                       </tr>
                     </table>
@@ -1836,7 +1759,6 @@ function _esc_boxPlato($dia, $cliente, $source='backend'){
 	$conDieta	=	false;
 	if($source!='backend')
 		$conDieta			=	_esc_clienteTieneDieta( $cliente );
-	
 	$categorias_alimento = _esc_getCategorias();
 	ob_start();
 ?>
@@ -1861,7 +1783,7 @@ function _esc_boxPlato($dia, $cliente, $source='backend'){
 foreach($categorias_alimento as $key=>$cat)	:
 ?>
 		<div class="esc-form-group esc-hide">
-			<label><?php echo $cat['nombre'] ?><span class="dieta"></span></label>
+			<label><?php echo $cat['name'] ?><span class="dieta"></span></label>
 			<select name="<?php echo $dia ?>[<?php echo $key ?>][]" data-categoria="<?php echo $key ?>" class="esc-form-control">
 				<option value="">---</option>
 			</select>
@@ -1870,8 +1792,12 @@ foreach($categorias_alimento as $key=>$cat)	:
 endforeach;
 ?>
 	</div>
-	<?php if(!$conDieta) :	?>
-	<div class="message-no-dieta">No se puede mostrar el precio por no tener una dieta asignada, favor contactar a servicio al cliente a <a href="tel:22222222">2222-2222</a></div>
+	<?php if($source!='backend') :	?>
+		<?php if(!$conDieta) :	?>
+		<div class="message-no-dieta">
+			No se puede mostrar el precio por no tener una dieta asignada, 
+			favor contactar a servicio al cliente a <a href="tel:71043940">7104-3940</a></div>
+		<?php endif;	?>
 	<?php endif;	?>
 </div>
 <?php 

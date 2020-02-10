@@ -327,7 +327,13 @@ public function extra_tablenav( $which ) {
 		$filter_dia = isset( $_REQUEST['filter_dia'] ) ? wp_unslash( trim( $_REQUEST['filter_dia'] ) ) : '';
 		$filter_periodo = isset( $_REQUEST['periodo'] ) ? wp_unslash( trim( $_REQUEST['periodo'] ) ) : 'anterior';
 
-		$html	.=	_esc_filterPeriodos( $filter_periodo );
+/*		$html	.=	_esc_filterPeriodos( $filter_periodo );*/
+		$args = array (
+				'actual'	=>	'Siguiente',
+				'anterior'	=>	'Actual'
+			);
+
+		$html	.=	_esc_filterPeriodos( $filter_periodo, $args );
 		$html	.=	_esc_filterDia($filter_dia);
 /*
 		$html	.=	'<p class="search-box">';
