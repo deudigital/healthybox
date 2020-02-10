@@ -34,6 +34,11 @@ class Direccion_List extends WP_List_Table {
 												array(
 													'key'   => '_esc_orden_status',
 													'value' => 'aprobado',
+												),
+												array(
+													'key'   => '_esc_orden_args',
+													'value' => serialize('domicilio'),
+													'compare' => 'LIKE'
 												)
 											)
 					);
@@ -43,12 +48,18 @@ class Direccion_List extends WP_List_Table {
 		foreach($ordenes as $key=>$orden){
 			$_esc_orden_cliente_id		=	get_post_meta($orden->ID, '_esc_orden_cliente_id', true);
 			$direcciones	=	get_post_meta($_esc_orden_cliente_id, '_esc_cliente_direccion', true);			
+			$_esc_orden_args	=	get_post_meta($orden->ID, '_esc_orden_args', true);			
+			/*_print($_esc_orden_args);*/
 			$cliente	=	get_post($_esc_orden_cliente_id);
 			if(!empty($filter_dia))
 				$direcciones	=	array($filter_dia=>$direcciones[$filter_dia]);
 			
 			$__direcciones	=	array();
 			foreach($direcciones as $__dia=>$__direccion){
+				if($_esc_orden_args[$__dia]['entrega']['opcion']!='domicilio')
+					continue ;
+				
+				
 				if($filter_ubicacion){
 					if($filter_provincia){
 						if($filter_provincia!=$__direccion['provincia'])
@@ -149,9 +160,14 @@ class Direccion_List extends WP_List_Table {
 				return $item[$column_name];
 			case 'direccion':
 				$direcciones	=	$item[$column_name];
+				$dias	=	array(
+								'lunes'	=>	'Lunes',
+								'miercoles'	=>	'Mi&eacute;rcoles',
+							);
+				
 				$html	=	'';
 				foreach($direcciones as $dia=>$direccion){
-					$html	.=		$dia . ': ' . $direccion . '<br>';
+					$html	.=		$dias[$dia] . ': ' . $direccion . '<br>';
 				}
 				return $html;
 				break;
@@ -205,7 +221,7 @@ class Direccion_List extends WP_List_Table {
 			/*'cb'      => '<input type="checkbox" />',*/
 			/*'direcciones'    => __( 'direcciones', 'sp' ),*/
 			'nombre'    => __( 'Nombre', 'sp' ),
-			'direccion'    => __( 'Direccion', 'sp' )
+			'direccion'    => __( 'Direcci&oacute;n', 'sp' )
 		];
 
 		return $columns;
@@ -250,7 +266,7 @@ class Direccion_List extends WP_List_Table {
 			$filter	.=				'</select>';
 			$filter	.=			'</div>';
 			$filter	.=			'<div class="combo">';
-			$filter	.=				'<label>Canton</label>';
+			$filter	.=				'<label>Cant&oacute;n</label>';
 			$filter	.=				'<select name="filter_canton" class="canton" data-selected="' . $filter_canton . '">';
 			$filter	.=					'<option value="">---</option>';
 			$filter	.=				'</select>';
@@ -327,7 +343,7 @@ class Direccion_List extends WP_List_Table {
 		$html	.=		'<select name="dia" onchange="this.form.submit()">';
 		$html	.=			'<option value="">Todos</option>';
 		$html	.=			'<option value="lunes"' . ($filter_dia=='lunes'? ' selected="selected"':''  ). '>Lunes</option>';
-		$html	.=			'<option value="miercoles"' . ($filter_dia=='miercoles'? ' selected="selected"':''  ). '>Miercoles</option>';
+		$html	.=			'<option value="miercoles"' . ($filter_dia=='miercoles'? ' selected="selected"':''  ). '>Mi&eacute;rcoles</option>';
 		$html	.=		'</select>';
 		$html	.=	'</p>';
 		echo $html;
@@ -391,7 +407,7 @@ class Direccion_List extends WP_List_Table {
 		$filter	.=	'				_select.html(\'\').append(option);				'. "\n";
 		$filter	.=	'				jQuery.each(_cantones_de_provincia, function(key, canton){'. "\n";
 		$filter	.=	'					let _value	=	canton.codigo_canton;'. "\n";
-		$filter	.=	'					let _text	=	canton.codigo_provincia + \'-\'+ canton.codigo_canton + \':\'+ canton.nombre_canton;'. "\n";
+		$filter	.=	'					let _text	=	canton.nombre_canton;'. "\n";
 		$filter	.=	'					option = new Option(_text, _value);'. "\n";
 		$filter	.=	'					_select.append(option);'. "\n";
 		$filter	.=	'				});'. "\n";
@@ -419,7 +435,7 @@ class Direccion_List extends WP_List_Table {
 		$filter	.=	'				_select.html(\'\').append(option);				'. "\n";
 		$filter	.=	'				jQuery.each(_distritos_de_canton, function(key, distrito){'. "\n";
 		$filter	.=	'					let _value	=	distrito.codigo_distrito;'. "\n";
-		$filter	.=	'					let _text	=	distrito.codigo_provincia + \'-\'+ distrito.codigo_canton + \'-\'+ distrito.codigo_distrito + \':\'+ distrito.nombre_distrito;'. "\n";
+		$filter	.=	'					let _text	=	distrito.nombre_distrito;'. "\n";
 		$filter	.=	'					option = new Option(_text, _value);'. "\n";
 		$filter	.=	'					_select.append(option);'. "\n";
 		$filter	.=	'				});'. "\n";
@@ -442,7 +458,7 @@ class Direccion_List extends WP_List_Table {
 		$filter	.=	'				_select.html(\'\').append(option);				'. "\n";
 		$filter	.=	'				jQuery.each(_provincias, function(key, provincia){'. "\n";
 		$filter	.=	'					let _value	=	provincia.codigo_provincia;'. "\n";
-		$filter	.=	'					let _text	=	provincia.codigo_provincia + \':\'+ provincia.nombre_provincia;'. "\n";
+		$filter	.=	'					let _text	=	provincia.nombre_provincia;'. "\n";
 		$filter	.=	'					option = new Option(_text, _value);'. "\n";
 		$filter	.=	'					_select.append(option);'. "\n";
 		$filter	.=	'				});				'. "\n";
@@ -504,17 +520,6 @@ class Direccion_List extends WP_List_Table {
 
 		$filter	.=	'</script>'. "\n";
 		echo $filter;
-		echo '<style>';
-		echo 'p.search-box{margin:5px 10px;min-width:150px}';
-		echo 'p.search-box label{display:block}';
-		echo 'p.search-box select{width:100%;max-width:100%}';
-		echo '.dropdowns > .combo:not(:first-child){margin-left:10px;}';
-		echo '.combo{display:inline-block}';
-		echo '.combo label{display:block}';
-		echo '.combo select{min-width:150px}';
-		echo '.combo .button{margin-top:-4px}';
-		echo '</style>';
-
 /*?>
 <p class="search-box">
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>

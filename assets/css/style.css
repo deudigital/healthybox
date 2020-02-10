@@ -145,7 +145,8 @@ body:not(.esc-open-modal) .esc-modal {display:none}
 .without-dieta .currency-symbol,
 .without-dieta .resume:not(.total) {display:none;}
 .dieta {font-weight: 100;}
-.message-no-dieta{}
+
+#wizard:not(.without-dieta) .message-no-dieta {display: none;}
 
 .button-edit-dieta {	background-color: #FF7179;    color: #fff;    padding: 3px 30px;    border-radius: 37px;
 	text-transform: uppercase;top: -33px;

@@ -70,9 +70,7 @@ function _esc_shortcode_form_order(){
 		
 		Dieta
 	</button>
-	<div class="info-updated">
-	ultima actualicion: 20/12/2019 11:00am
-	</div>
+
 	<div id="wizard"<?php echo $conDieta? '':' class="without-dieta"' ?>>
 	
 		<form id="form-wizard" method="post" action="<?php the_permalink(); ?>">
@@ -117,7 +115,7 @@ foreach($dias as $dkey=>$vdia)	:
 ?>
 							</div>
 							<?php if(!$conDieta) :	?>
-							<div class="message-no-dieta">No se puede mostrar el precio por no tener una dieta asignada, favor contactar a servicio al cliente a <a href="tel:22222222">2222-2222</a></div>
+							<div class="message-no-dieta">No se puede mostrar el precio por no tener una dieta asignada, favor contactar a servicio al cliente a <a href="tel:71043940">7104-3940</a></div>
 							<?php endif;	?>
 						</div>
 						<button type="button" class="btn btn-primary btn-add-plato">AÑADIR OTRO PLATO &plus;</button>
@@ -146,7 +144,7 @@ endforeach;
 foreach($dias as $dkey=>$vdia)	:
 ?>
 						<div class="box-dashed entrega">
-							<h3 class="box-dashed-title">Entrega <?php echo $vdia ?> 21 de octubre</h3>
+							<h3 class="box-dashed-title">Entrega <?php echo $fecha_mensaje[$dkey] ?></h3>
 							<table class="table-resumen">
 							<thead>
 								<tr>
