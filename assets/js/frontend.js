@@ -6,7 +6,7 @@ var _montos	=	[];
 var _current_dia	=	'';
 var _current_tipo	=	'';
 var _current_address_dia	=	'';
-
+var _container_ids	=	['lunes', 'miercoles'];
 function _setGlobal(){
 	aliments	=	[];
 	jQuery.each( _data.categorias, function( cat, tax ) {
@@ -22,18 +22,33 @@ function resizeJquerySteps(container=''){
 (function( $ ){
 	var form = $("#form-wizard");
 	if (typeof form == 'undefined')
-		form	=	false;
-	
+		form	=	false
+	function _withPlatos(){
+		var _dayWithPlato	=	true;
+		var _count=0;
+		jQuery.each(_container_ids, function( index, ele ) {
+			/*console.log( index, ele, platos[ele].length, platos[ele] );*/
+			/*_dayWithPlato	=	true;*/
+			if(platos[ele].length>0){
+				_count++;
+				/*return true;*/
+				/*if(_dayWithPlato)
+					_dayWithPlato	=	false;*/
+			}
+		});
+		/*console.log('_withPlatos', notEmpty);*/
+		/*return false;*/
+		/*return _dayWithPlato;*/
+		return _count>0;
+	}
 	function _isPlatoEmpty(elements, container_id){
 		var containers	=	['lunes', 'miercoles'];
 		let _index	=	containers.indexOf( container_id );
 		if( _index==-1 )
 			return false;
-		
 		var platos	=	jQuery('#' + container_id + ' .esc-plato');
 		if(platos.length>1)
 			return false;
-
 		var elements	=	jQuery('#' + container_id + ' .required').not('.notfound');	
 		var empty	=	true;
 		elements.each(function(){
@@ -48,7 +63,6 @@ function resizeJquerySteps(container=''){
 		var elements	=	jQuery('#' + container_id + ' .required').not('.notfound');	
 		if(_isPlatoEmpty( elements, container_id ))
 			return true;
-
 		elements.removeClass('has-error');
 		var valid	=	true;
 		var tagName	=	'';
@@ -89,7 +103,75 @@ function resizeJquerySteps(container=''){
 		});
 		return valid;
 	}
+	function _isElementsValidForSave(container_id){
+		var _with_dieta	=	_data.cliente.dieta || false;
+		if( _with_dieta )
+			var elements	=	jQuery('#' + container_id + ' .required').not('.notfound');
+		else
+			var elements	=	jQuery('#' + container_id + ' select.esc-form-control').not('.esc-hide');
+		
+		var valid	=	true;
+		var tagName	=	'';
+		var type	=	'';
+		var closest_group	=	'';
+		var inputs	=	['checkbox', 'radio'];
+		/*console.log(elements);*/
+		elements.each(function(){
+			type	=	jQuery(this).attr('type');
+			tagName	=	jQuery(this).get(0).tagName.toLowerCase();
+			
+			switch( tagName ){
+				case 'textarea':
+				case 'select':
+						if(jQuery(this).val().length==0){
+							/*jQuery(this).addClass('has-error');*/
+							if(valid)
+								valid	=	false;
+						}
+					break;
+				case 'input':
+						let _index	=	inputs.indexOf( type );
+						if( _index>-1 ){
+							closest_group	=	jQuery(this).closest('.group-' + type);
+							let checked	=	closest_group.find('.required:checked');
+							if(checked.length==0){
+								/*jQuery(this).parent().addClass('has-error');*/
+								if(valid)
+									valid	=	false;
+							}
+						}else{
+							if(jQuery(this).val().length==0){
+								/*jQuery(this).addClass('has-error');*/
+								if(valid)
+									valid	=	false;
+							}
+						}
+					break;
+			}			
+			console.log(type, tagName, valid);
+		});
+		/*console.log('_isElementsValidForSave', valid, container_id);*/
+		return valid;
+	}
 	function _saveInfoPlatos(container_id){
+		var _platos	=	jQuery('#' + container_id + ' .esc-plato');
+		var elements;
+		var data	=	[];
+		platos[container_id]=	[];
+		
+		if(!_isElementsValidForSave(container_id))
+			return ;
+		
+		_platos.each(function(){
+			elements	=	jQuery(this).find('.esc-form-control');	
+			elements.each(function(){
+				data[jQuery(this).data( 'categoria' )]	=	jQuery(this).val();
+			});
+			platos[container_id].push(data);
+			data	=	[];
+		});
+	}
+	function _saveInfoPlatos__original(container_id){
 		var _platos	=	jQuery('#' + container_id + ' .esc-plato');
 		var elements;
 		var data	=	[];
@@ -103,17 +185,23 @@ function resizeJquerySteps(container=''){
 			data	=	[];
 		});
 	}
-	function _confirmarPedido(){
+	function _confirmarPedido(){/*console.log('platos', platos)*/
 		var _row;
 		var _plato;
 		var monto	=	0;
 		var subtotal	=	0;
 		var total	=	0;
-		jQuery.each( ['lunes', 'miercoles'], function( _key, dia ) {
+		var _with_dieta	=	_data.cliente.dieta || false;
+		
+/*console.log(platos);*/
+		/*jQuery.each( ['lunes', 'miercoles'], function( _key, dia ) {*/
+		
+		jQuery.each( _container_ids, function( _key, dia ) {
 			jQuery('#resumen-platos-' + dia).html('');
 			_row	=	'';
 			subtotal=	0;
-			jQuery.each( platos[dia], function( key, obj ) {
+/*console.log( _key, dia, platos[dia]);*/
+			jQuery.each( platos[dia], function( key, obj ) {/*console.log('key', key, 'obj', obj);*/		
 				monto	=	0;
 				_row	+=	'<tr>';
 				_row	+=	'<td data-column="plato">' + (key+1) + '</td>';
@@ -124,9 +212,8 @@ function resizeJquerySteps(container=''){
 						k++;
 						return _return;
 					});
-
 				let tiempo	=	res[0][1];
-				jQuery.each( res, function(keey, el){
+				jQuery.each( res, function(keey, el){/*console.log('keey', keey, 'el', el);*/
 					if(el[0]=='tipo')
 						_row	+=	'<td data-column="tipo">' + el[1] + '</td>';
 					else{
@@ -139,39 +226,53 @@ function resizeJquerySteps(container=''){
 							_row	+=	'<td data-column="' + el[0] + '">---</td>';
 					}
 				});
-				if(!_sin_dieta){
+				/*if(!_sin_dieta){*/
+				if(_with_dieta){
 					_row	+=	'<td data-column="Precio">&#8353;' + _formatThisNumber(monto) + '</td>';
 					subtotal	+=	parseFloat( monto );
 				}else
 					_row	+=	'<td data-column="Precio">N/A</td>';
-
 				_row	+=	'</tr>';
 			});
 			jQuery('#resumen-platos-' + dia).append( _row );
-			if(!_sin_dieta)
+			/*if(!_sin_dieta)*/
+			if(_with_dieta)
 				jQuery('#resumen-platos-' + dia).next().find( '.subtotalamount:first' ).html(_formatThisNumber(subtotal));
 			else
 				jQuery('#resumen-platos-' + dia).next().find( '.subtotalamount:first' ).html('N/A');
-			
 			total	+=	parseFloat( subtotal );
-			
 			if(jQuery('#entrega-' + dia + ' input:checked').val()=='domicilio')
 				total	+=	1500;
 		});
-		if(!_sin_dieta)
+		/*if(!_sin_dieta)*/
+		if(_with_dieta)
 			jQuery('#grantotalamount').html( _formatThisNumber(total) );
 		else
 			jQuery('#grantotalamount').html( 'N/A' );
-
+		
+		jQuery.each( _container_ids, function( _key, dia ) {
+			if(platos[dia].length==0){
+				let _input	=	jQuery('#entrega-' + dia).find('input[value=\'recoger\']');
+				_input.prop('checked', true);
+			/*	_input.change();*/
+				jQuery('#entrega-' + dia).hide();
+				jQuery('#entrega-' + dia).prev().hide();
+			}	
+			else{
+				jQuery('#entrega-' + dia).show();
+				jQuery('#entrega-' + dia).prev().show();
+			}
+		});
 		setTimeout(function(){
 			resizeJquerySteps('#entrega');			
 		}, 500);
 	}
 	function _getDataValue(dia, tiempo, categoria, alimento_id ){
+		if(!tiempo)
+			return {'alimento_title':'', 'alimento_precio':0};
 		const alimentos	=	_data.alimentos[dia][tiempo][categoria];
 		if(!alimentos)
 			return {'alimento_title':'', 'alimento_precio':0};
-
 		var row	=	alimentos.filter(x => x.alimento_id === parseInt(alimento_id));
 		return row[0];
 	}
@@ -180,7 +281,6 @@ function resizeJquerySteps(container=''){
 		tipo=	_this.closest('.esc-plato').find('select[data-categoria="tipo"]').val();
 		if(!_data.alimentos[dia] || !_data.alimentos[dia][tipo])
 			return ;
-
 		_current_dia	=	dia;
 		_current_tipo	=	tipo;
 	}
@@ -188,14 +288,11 @@ function resizeJquerySteps(container=''){
 		dia	=	parent.closest('.esc-platos').attr('id');
 		if(!_data.alimentos[dia] || !_data.alimentos[dia][tipo])
 			return ;
-
 		_current_dia	=	dia;
 		_current_tipo	=	tipo;
-		
 		var _amount	=	parent.find('.amount:first');
 		_amount.data( 'amount', 0 );
 		_amount.html( 0 );
-		
 		var _with_dieta	=	_data.cliente.dieta || false;
 		var _select;
 		jQuery.each(aliments, function( index, ele ) {
@@ -219,8 +316,10 @@ function resizeJquerySteps(container=''){
 							_qty	=	' - ' + _qty + ' porciones';
 						else
 							_qty	=	' - ' + _qty + ' porci&oacute;n';
-						
 						_select.parent().find('.dieta').html( _qty );						
+					}else{
+						_select.addClass('notfound');
+						_select.closest('.esc-form-group').addClass('esc-hide');
 					}
 				}			
 				jQuery.each(_data.alimentos[dia][tipo][ele], function(key, alimento){
@@ -324,14 +423,14 @@ function resizeJquerySteps(container=''){
 	function _getPrecio(alimento_id, categoria, dia, tipo){
 		let _dia	=	dia || _current_dia;
 		let _tipo	=	tipo || _current_tipo;
-		
+		if(!_tipo)
+			return 0;
 		let alimentos	=	_data.alimentos[_dia][_tipo][categoria];
 		if(!alimentos)
 			return 0;
 		var row	=	alimentos.filter(x => x.alimento_id === parseInt(alimento_id));
 		if(row.length==0)
 			return 0;
-
 		_alimento	=	row[0];
 		var msg_precio	=	categoria + '[' + _tipo + ']'
 		var _precio	=	_data.categorias[categoria]['precios'][_tipo];
@@ -364,20 +463,12 @@ function resizeJquerySteps(container=''){
 		jQuery('#container-address-' + dia ).removeClass('esc-hide');
 		_current_address_dia	=	dia
 	}
-
 	function _updatePrices(){
 		jQuery.each( ['lunes', 'miercoles'], function( _key, dia ) {
 			_saveInfoPlatos(dia);
-			
-			
-			
 			let _platos	=	jQuery('#' + dia + ' .esc-plato');
 			jQuery.each( _platos, function( _key, dia ) {
-				
-				
-				
 				_updateDropdownMessageDieta(jQuery(this), jQuery(this).find('select.tipo:first').val());
-
 				_calculatePlatoAmount(jQuery(this).find(' .ingredientes select:first'));
 			});			
 			_calculateResumeSubtotalPlatos( jQuery('#' + dia) );
@@ -398,29 +489,28 @@ function resizeJquerySteps(container=''){
 		var _amount	=	parent.find('.amount:first');
 		_amount.data( 'amount', 0 );
 		_amount.html( 0 );
-		
 		var _with_dieta	=	_data.cliente.dieta || false;
 		var _select;
 		jQuery.each(aliments, function( index, ele ) {
 			_select	=	parent.find('select[data-categoria="' + ele + '"]');
-			if(_data.alimentos[dia][tipo][ele]){			
+			_select.parent().find('.dieta').html( '' );
+			if(_data.alimentos[dia][tipo][ele]){
 				if(_with_dieta){
 					if(parseInt(_data.cliente.dieta[tipo][ele])>0){
 						console.log('dieta',tipo,ele, _data.cliente.dieta[tipo][ele]);
-
 						let _qty	=	parseInt(_data.cliente.dieta[tipo][ele]);
 						if(_qty>1)
 							_qty	=	' - ' + _qty + ' porciones';
 						else
 							_qty	=	' - ' + _qty + ' porci&oacute;n';
-						
-						_select.parent().find('.dieta').html( _qty );						
-					}
+						_select.parent().find('.dieta').html( _qty );
+						_select.closest('.esc-form-group').removeClass('esc-hide');
+					}else
+						_select.closest('.esc-form-group').addClass('esc-hide');
 				}			
 			}
 		});
 	}
-
 if(form.length){
 	form.steps({
 		headerTag: "h2",
@@ -451,7 +541,13 @@ if(form.length){
 				_saveInfoPlatos(jQuery('.body:eq(' + currentIndex + ') .esc-platos:first').attr('id'));
 				valid	=	true;
 			}
-			if(valid && newIndex==2){
+			if(valid && newIndex==2 ){
+				if(!_withPlatos()){
+					alert('Debe adicionar minimo un plato para continuar!');
+					return false;
+				}
+				/*console.log('platos', platos);*/
+				/*console.log('onStepChanging');*/
 				_confirmarPedido();
 			}
 			return valid;
@@ -505,9 +601,7 @@ if(form.length){
 				}).fail(function() {
 					jQuery('#form-dieta').html('');
 				}).always(function() {
-					
 				});
-			
 				break;
 			case 'direcciones-entrega':
 				jQuery('#direcciones .direccion').addClass('esc-hide');
@@ -554,7 +648,6 @@ if(form.length){
 				console.log(response.status);
 				console.log(response.dieta);
 			if ( 'finished' == response.status ) {
-				
 				_data.cliente.dieta	=	response.dieta;
 				_with_dieta	=	response.with_dieta;
 				_updatePrices();
@@ -597,10 +690,8 @@ if(form.length){
     });
 	jQuery("body").on("click", "a.esc-plato-delete", {}, function(event){		
 		var platos	=	jQuery(this).closest(".esc-platos");
-		
 		let _height_plato	=	jQuery(this).closest().height();
 		jQuery(this).closest(".esc-plato").remove();
-		
 		let current_height_content	=	jQuery('.wizard .content:first').height();
 		jQuery('.wizard .content:first').height( current_height_content - _height_plato );
 		_calculateResumeSubtotalPlatos( platos )
@@ -619,8 +710,6 @@ if(form.length){
 	});	
 	jQuery("body").on("change", ".opcion-entrega input", {}, function(event){
 		_confirmarPedido();
-		
 		_displayAddress(jQuery(this));
 	});	
-
 })( jQuery );

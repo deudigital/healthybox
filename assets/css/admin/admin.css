@@ -1,52 +1,16 @@
-﻿.text-red{color:red !important;}
-p.search-box{margin:5px 10px;min-width:150px}
-p.search-box label{display:block}
-p.search-box select{width:100%;max-width:100%}
-
-/*.search-box > label{display:block}*/
-.tablenav .actions {margin-bottom: 8px;}
-
-.dropdowns{float:left;margin-bottom:15px}
-.dropdowns > .combo:not(:first-child){margin-left:10px;}
-.combo{display:inline-block}
-.combo label{display:block}
-.combo select{min-width:150px}
-.combo .button{margin-top:-4px}
-
-.esc.form-table th,
-.esc.form-table td {padding: 5px;}
-/*	tags Categorias	*/
-.inputs{display:grid;grid-template-columns:31% 31% 31%;grid-gap:10px;}
-
-/*	Alimento	*/
-.asignacion-dias{}
-.asignacion-dias > li{}
-.asignacion-dias > li h3{font-size:0.95em;font-weight:600}
-.asignacion-dias > li label {margin: 5px;}
-.esc.form-table.alimento-edit th,
-.esc.form-table.alimento-edit td {vertical-align:text-top;}
-.esc.form-table.alimento-edit > tbody > tr > th {width: auto;}
-.esc.form-table.alimento-edit > tbody > tr > th:nth-child(2){width: 35%;}
-
-
-/*	empaques	*/
-.cliente {text-align:center;}
-.wp-list-table.widefat.empaques > tbody > tr:nth-child(even) {background-color: #f5f5f5;}
-.wp-list-table.empaques tr td.actions {line-height: 2.5em;}
-.wp-list-table.empaques {display: table;}
-.wp-list-table.empaques td {width: 50%;vertical-align: middle;}
-.wp-list-table.empaques tr  td.actions {width: 10%;}
-.wp-list-table.empaques ul {margin: 15px 0;display: flex;}
-.wp-list-table.empaques ul > li{position:relative;}
-.wp-list-table.empaques ul > li > input {position: absolute;top: 50%;left:-20px}
-.wp-list-table.empaques ul > li:nth-child(2) {display: flex;line-height: 1;text-align: center;flex-direction: column;align-self: center;padding: 0 15px;}
-ul.platos.empaquetado {color: #bbb;}
-.plato {border: 1px solid #f1f1f1;display: table-cell;vertical-align: top;margin:0 1%}
-ul:not(.empaquetado) .plato {border: 1px solid rgba(150, 182, 84, 0.5);}
-.plato >  div {padding: 5px;text-align: center;max-width: 100%;width: 120px;min-height:19px;}
-ul.empaquetado .plato > .categoria {background-color: #f1f1f1;}
-ul.empaquetado .plato > .dieta {background-color: #f5f5f5;}
-ul:not(.empaquetado) .plato > .categoria {background-color: rgba(150, 182, 84, 0.25);}
-ul:not(.empaquetado).plato > .dieta {background-color: rgba(150, 182, 84, 0.15);}
-.plato > .alimento {line-height: 1.2em;text-align:left;font-size:0.9em}
-input.toggle-estado-empaquetado:checked + span {position: absolute;content: "";top: 0;width: 25px;height: 25px;display: block;background: url(' . ESCHB_URL . 'assets/images/icons/50/check.png) no-repeat center center #fff;left: 0;background-size: cover;}
+﻿.text-red{color:red !important;}p.search-box{margin:5px 10px;min-width:150px}p.search-box label{display:block}p.search-box select{width:100%;max-width:100%}/*.search-box > label{display:block}*/.tablenav .actions {margin-bottom: 8px;}.dropdowns{float:left;margin-bottom:15px}.dropdowns > .combo:not(:first-child){margin-left:10px;}.combo{display:inline-block}.combo label{display:block}.combo select{min-width:150px}.combo .button{margin-top:-4px}.esc.form-table th,.esc.form-table td {padding: 5px;}/*	tags Categorias	*/.inputs{display:grid;grid-template-columns:31% 31% 31%;grid-gap:10px;}/*	Alimento	*/.asignacion-dias{}.asignacion-dias > li{}.asignacion-dias > li h3{font-size:0.95em;font-weight:600}.asignacion-dias > li label {margin: 5px;}.esc.form-table.alimento-edit th,.esc.form-table.alimento-edit td {vertical-align:text-top;}.esc.form-table.alimento-edit > tbody > tr > th {width: auto;}.esc.form-table.alimento-edit > tbody > tr > th:nth-child(2){width: 35%;}/*	empaques	*/.cliente {text-align:center;}.wp-list-table.widefat.empaques > tbody > tr:nth-child(even) {background-color: #f5f5f5;}.wp-list-table.empaques tr td.actions {line-height: 2.5em;}.wp-list-table.empaques {display: table;}.wp-list-table.empaques td {width: 50%;vertical-align: middle;}.wp-list-table.empaques tr  td.actions {width: 10%;}.wp-list-table.empaques ul {margin: 15px 0;display: flex;}.wp-list-table.empaques ul > li{position:relative;}.wp-list-table.empaques ul > li > input {position: absolute;top: 50%;left:-20px}.wp-list-table.empaques ul > li:nth-child(2) {display: flex;line-height: 1;text-align: center;flex-direction: column;align-self: center;padding: 0 15px;}ul.platos.empaquetado {color: #bbb;}.plato {border: 1px solid #f1f1f1;display: table-cell;vertical-align: top;margin:0 1%}ul:not(.empaquetado) .plato {border: 1px solid rgba(150, 182, 84, 0.5);}.plato >  div {padding: 5px;text-align: center;max-width: 100%;width: 120px;min-height:19px;}ul.empaquetado .plato > .categoria {background-color: #f1f1f1;}ul.empaquetado .plato > .dieta {background-color: #f5f5f5;}ul:not(.empaquetado) .plato > .categoria {background-color: rgba(150, 182, 84, 0.25);}ul:not(.empaquetado).plato > .dieta {background-color: rgba(150, 182, 84, 0.15);}.plato > .alimento {line-height: 1.2em;text-align:left;font-size:0.9em}input.toggle-estado-empaquetado:checked + span {position: absolute;content: "";top: 0;width: 25px;height: 25px;display: block;background: url(' . ESCHB_URL . 'assets/images/icons/50/check.png) no-repeat center center #fff;left: 0;background-size: cover;}
+.btn-ajax {
+    position: relative;
+    margin-top: 10px !important;
+}
+.btn-ajax::after {
+    position: absolute;
+    content: "";
+    width: 50px;
+    height: 50px;
+    background: url(../../images/loading.svg) no-repeat center center transparent;
+    top: -10px;
+    left: 100%;
+    background-size: cover;
+}
+.btn-ajax:not(.processing):after{display:none;}

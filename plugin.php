@@ -5,7 +5,7 @@ Plugin Name: Healthy Box
 Plugin URI: https://deudigital.com/projects/healthy-box/
 Description: Custom plugin for manage platos.
 Version: 1.0
-Author: Jaime Isidro
+Author: Deudigital Team
 Author URI:  https://deudigital.com
 */
 
@@ -62,7 +62,7 @@ class HB_Plugin {
 		/*add_action('login_head', array($this, '_eschb_login_head_after_reset_password'));*/
 		add_action( 'after_password_reset', array($this, '_eschb_login_head_after_reset_password' ));
 		
-		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
+		/*add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );*/
 		add_action( 'woocommerce_customer_reset_password', 'action_woocommerce_reset_password', 10, 1 );
 		
 		add_action('wp_head', array($this, '_eschb_blog_favicon'));
@@ -76,6 +76,7 @@ class HB_Plugin {
 		add_action( 'user_register', array($this, 'crf_user_register' ));
 		
 		add_filter( 'wp_new_user_notification_email', array($this, '_eschb_wp_new_user_notification_email'), 100, 3);
+		add_filter( 'retrieve_password_message', array($this, '_eschb_retrieve_password_message'), 100, 4 );
 		add_filter( 'wp_mail_content_type', array($this, '_eschb_wp_mail_content_type'));
 		
 		require_once('includes/functions.php');
@@ -91,7 +92,10 @@ class HB_Plugin {
 	}
 
 	function _eschb_editable_roles($all_roles ){
+		/*_print($all_roles);*/
 		$healthybox_roles	=	array('cliente','cocina', 'healthybox_servicio_cliente', 'healthybox_manager');
+		if(current_user_can('update_core'))
+			$healthybox_roles[]	=	'administrator';
 		$roles	=	array();
 		foreach($all_roles as $key=>$role){
 			if(in_array($key, $healthybox_roles))			
@@ -155,6 +159,13 @@ class HB_Plugin {
 		$wp_new_user_notification_email['subject']	=	__( '[%s] Nuevo Usuario' );
 		$wp_new_user_notification_email['message']	=	$message;
 		return $wp_new_user_notification_email;
+	}
+	function _eschb_retrieve_password_message( $message, $key, $user_login, $user_data ){
+		/*$key        = get_password_reset_key( $user_data );*/
+		$email	=	file_get_contents(plugin_dir_url( __FILE__ ) . '/includes/emails/reset_password_notification_email.html');
+		$message	=	str_replace('{{EMAIL}}', $user_login, $email);
+		$message	=	str_replace('{{LINK_CHANGE_PASSWORD}}', network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user_login ), 'login' ), $message);	
+		return $message;
 	}
 	function _esc_login_redirect($redirect_to, $requested_redirect_to, $user ){
 		/*_print(func_get_args());exit;*/
@@ -263,6 +274,13 @@ $args	=	array(
 
 	}
 	function crf_user_register( $user_id ) {
+		// Exceptions for AJAX, Cron, or WP-CLI requests
+		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		if(is_admin())
+			return ;
+/*		_print('sadfadfddafd sdfasdfd sadfdsfa asdf asdfsdf');exit;*/
 		$post_data = array(
 			'post_title'   => $_POST['user_name'],
 			'post_status'  => 'publish',
@@ -281,7 +299,7 @@ $args	=	array(
 		update_user_meta( $user_id, 'first_name', $_POST[ 'user_name' ] );
 		update_user_option($user_id, 'default_password_nag', true, true);
 		/*$user_pass	=	wp_generate_password(12, false);*/
-		$user_pass	=	'S9dcut&mOlHR(d3^DySSgj%(';
+		$user_pass	=	'S9dcut&mOlHR(d3^DySSgj%(';		wp_set_password( $user_pass, $user_id );
 		
          // Set up the Password change nag.
          wp_new_user_notification($user_id, $user_pass);
@@ -296,7 +314,7 @@ $args	=	array(
 		
 		wp_set_current_user( $user_id, $user_login );
 		wp_set_auth_cookie( $user_id, true, false );
-		wp_redirect( site_url('/pedido/') ); 
+		wp_redirect( site_url('/') ); 
 		exit;
 	}	
 	function _esc_registration_redirect( $registration_redirect ){
@@ -304,6 +322,69 @@ $args	=	array(
 		return $registration_redirect;
 	}
 	function v_forcelogin() {
+
+		// Exceptions for AJAX, Cron, or WP-CLI requests
+		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+
+		$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
+		$url .= '://' . $_SERVER['HTTP_HOST'];
+		// port is prepopulated here sometimes
+		if ( strpos( $_SERVER['HTTP_HOST'], ':' ) === FALSE ) {
+			$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
+		}
+		$url .= $_SERVER['REQUEST_URI'];
+		$whitelist	=	array(
+							home_url('/gracias/'), 
+							home_url('/politica-privacidad/')
+						);
+		if(in_array( $url, $whitelist ))
+			return ;
+		
+		// Redirect unauthorized visitors
+		if ( ! is_user_logged_in() ) {
+			// Get visited URL
+			/*$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
+			$url .= '://' . $_SERVER['HTTP_HOST'];
+			// port is prepopulated here sometimes
+			if ( strpos( $_SERVER['HTTP_HOST'], ':' ) === FALSE ) {
+				$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
+			}
+			$url .= $_SERVER['REQUEST_URI'];*/
+
+			/**
+			 * Bypass filters.
+			 *
+			 * @since 3.0.0 The `$whitelist` filter was added.
+			 * @since 4.0.0 The `$bypass` filter was added.
+			 * @since 5.2.0 The `$url` parameter was added.
+			 */
+			$bypass = apply_filters( 'v_forcelogin_bypass', false, $url );
+			$whitelist = apply_filters( 'v_forcelogin_whitelist', array(home_url('/gracias/'), home_url('/politica-privacidad/'), ) );
+//_print($url);_print($whitelist);exit;
+			if ( preg_replace( '/\?.*/', '', $url ) !== preg_replace( '/\?.*/', '', wp_login_url() ) && ! $bypass && ! in_array( $url, $whitelist ) ) {
+				// Determine redirect URL
+				$redirect_url = apply_filters( 'v_forcelogin_redirect', $url );
+				// Set the headers to prevent caching
+				nocache_headers();
+				// Redirect
+				wp_safe_redirect( wp_login_url( $redirect_url ), 302 ); exit;
+			}
+		}else{
+			$user	=	wp_get_current_user();
+			$roles	=	( array ) $user->roles;
+			/*if(in_array('cliente', $roles)){
+				wp_redirect(home_url('/', 'http'), 301);
+				exit;
+			}*/
+			if(!is_admin() && !in_array('cliente', $roles)){
+				wp_redirect(admin_url('/', 'http'), 301);
+				exit;
+			}	
+		}
+	}
+	function v_forcelogin__original() {
 
 		// Exceptions for AJAX, Cron, or WP-CLI requests
 		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
@@ -329,8 +410,8 @@ $args	=	array(
 			 * @since 5.2.0 The `$url` parameter was added.
 			 */
 			$bypass = apply_filters( 'v_forcelogin_bypass', false, $url );
-			$whitelist = apply_filters( 'v_forcelogin_whitelist', array() );
-
+			$whitelist = apply_filters( 'v_forcelogin_whitelist', array(home_url('/gracias/'), home_url('/politica-privacidad/'), ) );
+//_print($url);_print($whitelist);exit;
 			if ( preg_replace( '/\?.*/', '', $url ) !== preg_replace( '/\?.*/', '', wp_login_url() ) && ! $bypass && ! in_array( $url, $whitelist ) ) {
 				// Determine redirect URL
 				$redirect_url = apply_filters( 'v_forcelogin_redirect', $url );
@@ -364,7 +445,7 @@ $args	=	array(
 		
 		wp_set_current_user( $user->ID, $user->user_login );
 		wp_set_auth_cookie( $user->ID, true, false );
-		wp_redirect( site_url('/pedido/') );
+		wp_redirect( site_url('/') );
 		exit;
 	}
 	function _esc_admin_enqueue_scripts(){
@@ -397,7 +478,7 @@ $args	=	array(
 		wp_enqueue_script('healthybox-wizard-js', plugin_dir_url( __FILE__ ) . 'assets/js/wizard.js', array( 'healthybox-steps-js' ), '1.0', true );
 
 
-		wp_enqueue_script('healthybox-frontend-js', plugin_dir_url( __FILE__ ) . 'assets/js/frontend.js', array( 'jquery' ), '1.0', true );
+		wp_enqueue_script('healthybox-frontend-js', plugin_dir_url( __FILE__ ) . 'assets/js/frontend.js', array( 'jquery' ), '1.1', true );
 		wp_localize_script( 'healthybox-frontend-js', 'my_ajax_object',array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
 
 		wp_enqueue_script('healthybox-quick-edit-script', plugin_dir_url(__FILE__) . '/post-quick-edit-script.js', array('jquery','inline-edit-post' ));
