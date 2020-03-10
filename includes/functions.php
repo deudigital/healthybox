@@ -762,10 +762,13 @@ function _esc_getCategorias(){
 }
 function _esc_getAlimentosFromOrdenArgs($data){
 	$selected_ids	=	array();
-	foreach($data as $key=>$platos){
+	foreach($data as $key=>$platos){/*_print($platos);*/
 		foreach($platos as $pkey=>$plato){
-			if($pkey!='tipo')
+			if($pkey!='tipo' && $plato){
+				/*_print($pkey);
+				_print($plato);*/
 				$selected_ids[]	=	$plato['alimento_id'];
+			}
 		}
 	}	
 	$ids	=	implode(',', $selected_ids);
@@ -942,6 +945,7 @@ function _esc_processSubmittedFormPedido($_SUBMITTED){
 	$form_data_platos	=	array();
 	$selected_ids		=	array();
 	$index_key	=	1;
+	$with_platos	=	false;
 	foreach($dias as $dkey=>$dvalue){
 		$_platos_count	=	count($_SUBMITTED[$dkey]['tipo']);
 		$array_days	=	array();
@@ -972,7 +976,9 @@ _print($array);*/
 				$index_key++;
 			}
 		}
-		$form_data_platos[$dkey]['platos']	=	$array_days;		
+		$form_data_platos[$dkey]['platos']	=	$array_days;
+		if(count($array_days)>0)
+			$with_platos	=	true;
 		$entrega	=	array(
 							'opcion'	=>	$_SUBMITTED[$dkey]['entrega'],
 							'precio'	=>	($_SUBMITTED[$dkey]['entrega']=='domicilio'? 1500:0)
@@ -1133,9 +1139,10 @@ _print($data);*/
 	exit;*/
 	$_esc_cliente_correo			=	get_post_meta($_clienteData['id'], '_esc_cliente_correo', true);
 	$to	=	$_esc_cliente_correo;/*_print($_esc_cliente_correo);*/
-	$headers[] = 'From: Healthy Box <info@healthybox.deudigital.com>';
-	$headers[] = 'Cc: Danilo Mata <danilo@deudigital.com>';
-	$headers[] = 'Bcc: servicioalcliente@gruposng.com,jaime@solutionswebonline.com';
+	$headers[] = 'From: Healthy Box <info@saludablecr.com>';
+	/*$headers[] = 'Cc: Danilo Mata <danilo@deudigital.com>';*/
+	/*$headers[] = 'Bcc: servicioalcliente@gruposng.com,jaime@solutionswebonline.com';*/
+	$headers[] = 'Bcc: servicioalcliente@gruposng.com';
 	$message	.=	$html_new_email;
 	add_filter('wp_mail_content_type', function( $content_type ) {
 		return 'text/html';
@@ -1143,12 +1150,14 @@ _print($data);*/
 	date_default_timezone_set('America/Halifax');
 	if($editing){
 		update_post_meta($_SUBMITTED['post_ID'], '_esc_orden_args', $form_data_platos);
-		wp_mail( $to, 'Se ha Actualizado tu Orden', $message, $headers );
+		if($_SUBMITTED['esc_orden_status']=='aprobado' && $with_platos)
+			wp_mail( $to, 'Se ha Actualizado tu Orden', $message, $headers );
 	}else{
 		$post_data = array(
 			'post_title'   => 'Order #',
 			'post_status'  => 'publish',
 			'post_type' 	=> 'orden',
+			'post_date' 	=> $_SUBMITTED['post_date'],
 			'post_author'  => get_current_user_id(),
 			'meta_input'   => array(
 				'_esc_orden_cliente_id' => $_clienteData['id'],
@@ -1234,17 +1243,20 @@ function _esc_getPeriodos(){
 	/*_print($periodos);*/
 	return $periodos;
 }
-function _esc_parImpar($date=false, $output='result'){
+function _esc_parImpar($date=false, $output='result'){/*_print('_esc_parImpar');_print(func_get_args());*/
 	if($date){
 		$date		=	new DateTime($date);
 	}else{
 		$date	=	new DateTime();
 		$weekNumber	=	$date->format('W');
 	}
+	$_fecha_actual	=	$date->format('l jS \of F Y');
+	/*_print($date);*/
 	$daynumber	=	$date->format('N');
 	/*_print('$daynumber: ' . $daynumber);*/
 	if( $daynumber != 4 ){
-		$date	=	new DateTime('previous thursday');
+		/*$date	=	new DateTime('previous thursday');*/
+		$date->modify('previous thursday');
 		/*_print($date);*/
 		$weekNumber =	$date->format('W');
 	}
@@ -1256,7 +1268,8 @@ function _esc_parImpar($date=false, $output='result'){
 	$return	=	array(
 					'result'		=>	$week_par_impar,
 					'num_dia'	=>	intval($daynumber),
-					'fecha_actual'	=>	date('l jS \of F Y'),
+					/*'fecha_actual'	=>	date('l jS \of F Y'),*/
+					'fecha_actual'	=>	$_fecha_actual,
 					'periodo'	=>	array(
 										'inicio'	=>	$date->format('l jS \of F Y'),
 										'num_semana'	=>	intval($weekNumber),

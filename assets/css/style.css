@@ -228,6 +228,11 @@ body:not(.esc-open-modal) .esc-modal {display:none}
 @media(max-width:1199px){
 	.site-content {margin: 0 50px;}	
 }
+@media(max-width:782px){
+	#wp-toolbar {text-align: center;}
+	#wp-toolbar > ul > li{display:block !important}
+	#wp-admin-bar-top-secondary {float: none !important;display: inline-block;}
+}
 @media(max-width:767px){
 	.tipo-plato {display: flex;flex-direction: column-reverse;}
 	.esc-price {margin-top: -25px;margin-bottom: 10px;}

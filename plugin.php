@@ -280,7 +280,7 @@ $args	=	array(
 		}
 		if(is_admin())
 			return ;
-/*		_print('sadfadfddafd sdfasdfd sadfdsfa asdf asdfsdf');exit;*/
+
 		$post_data = array(
 			'post_title'   => $_POST['user_name'],
 			'post_status'  => 'publish',
@@ -804,6 +804,8 @@ $args	=	array(
 				'manage_healthybox'			=>	true,
 				'manage_users'				=>	true,
 				'create_users'				=>	true,
+				'promote_users'				=>	true,
+				'promote_user'				=>	true,
 				'edit_user'					=>	true,
 				'read_user'         		=>	true, 
 				'delete_user'	     		=>	true, 
