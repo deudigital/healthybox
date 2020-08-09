@@ -33,7 +33,7 @@ class Empaque_List extends WP_List_Table {
 
 		$args	=	array(
 						'post_type'   	=>	'orden',
-						'numberposts'	=>	( $page_number - 1 ),
+						'numberposts'	=>	-1,
 						'meta_query'	=>	array(
 												array(
 													'key'   => '_esc_orden_status',

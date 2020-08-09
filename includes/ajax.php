@@ -19,6 +19,7 @@ function _esc_get_ubicaciones(){
 /*add_action( 'wp_ajax_nopriv_get_data', '_esc_get_data' );*/
 add_action( 'wp_ajax_get_data', '_esc_get_data' );
 function _esc_get_data(){
+	date_default_timezone_set('America/Costa_Rica');
 	/*check_ajax_referer( 'get_data', 'security' );*/
 	if(isset($_REQUEST['cliente_id']) && !empty($_REQUEST['cliente_id'])){
 		$cliente_id	=	$_REQUEST['cliente_id'];

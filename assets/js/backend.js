@@ -564,7 +564,7 @@ function resizeJquerySteps(container=''){
 				jQuery('#esc-message').html('Actualizando Precios...');
 				
 				_updatePrices();
-				
+				_confirmarPedido();
 				jQuery('#esc-message').html('Precios Actualizados');
 				setTimeout(function(){
 					jQuery('#esc-message').addClass('esc-hide');

@@ -482,7 +482,7 @@ function esc_meta_box_orden_form($post){
 		foreach($platos['platos'] as $key=>$plato){
 			if(is_array($plato)){
 				foreach($plato as $cat=>$alimento){
-					if($cat!='tipo' && $alimento['alimento_id']){
+					if($cat!='tipo' && isset($alimento['alimento_id'])){
 						$selected_ids[]	=	$alimento['alimento_id'];
 					}
 				}
@@ -498,9 +498,10 @@ function esc_meta_box_orden_form($post){
 	$alimentos	=	array();
 	foreach($posts as $key=>$_post)
 		$alimentos[$_post->ID]	=	$_post->post_title;
+	/*_print($post->post_date);*/
 	$_alimentos	=	_esc_getAlimentos( $post->post_date );
+	global $_parImpar;
 	if(isset($_REQUEST['test'])){
-		global $_parImpar;
 		_print($_parImpar);
 	}
 	//_print($_alimentos);
@@ -532,6 +533,7 @@ echo '<div id="esc-message" class="update-nag esc-hide"></div>';
 			$html_tipo	=	'';
 			$html_cat_selects	=	'';
 			$__tipo	=	$plato['tipo'];
+			/*_print($plato);*/
 			foreach($plato as $cat=>$alimento){
 				if($cat=='tipo'){
 						$output	=	'<select name="' .$dia . '[tipo][]" data-categoria="tipo" class="esc-form-control tipo required">';
@@ -549,7 +551,11 @@ echo '<div id="esc-message" class="update-nag esc-hide"></div>';
 					$html_tipo	.=		$output;
 					$html_tipo	.=	'</div>';
 				}else{
+					if(!$alimento)
+						continue ;
+					/*_print('$alimento');_print($alimento);_print($cat);*/
 					$alimento_id	=	$alimento['alimento_id'];
+					/*_print('$alimento_id-> ' . $alimento_id);*/
 					$option_html	=	'<option value="">---</option>';
 					/*_print('$alimento_id:' . $alimento_id);*/
 					/*if(!empty($alimento_id)){*/
@@ -580,7 +586,7 @@ echo '<div id="esc-message" class="update-nag esc-hide"></div>';
 					$cantidad	=	empty($alimento_id)? 0:1;
 					if($alimento['dieta'])
 						$cantidad	=	$alimento['dieta'];
-					if($alimento['precios']['alimento'])
+					if(isset($alimento['precios']['alimento']) && !empty($alimento['precios']['alimento']))
 						$monto +=	$alimento['precios']['alimento'] * $cantidad;
 					else
 						$monto +=	$alimento['precios']['cat'] * $cantidad;
@@ -795,13 +801,18 @@ input[type=radio]:checked::before {background-color: #e47263;}
 <script type="text/javascript">
 var _sin_dieta	=	<?php echo $conDieta? 'false':'true'	?>;
 var _with_dieta	=	<?php echo $conDieta? 'true':'false'	?>;
-	jQuery(document).ready(function($){		
+	jQuery(document).ready(function($){
+		const new_title	=	'Order #' + jQuery('#post_ID').val();
+		jQuery('input[name="post_title"]').val(new_title);
+		jQuery('input[name="post_title"]').attr('readonly', true);
+		
 			$.ajax({
 				url: ajaxurl,
 				data: {
 					action: "get_data",
 					cliente_id: '<?php echo $_esc_orden_cliente_id ?>',
 					security: "<?php echo wp_create_nonce('get_data') ?>",
+					week: "<?php echo  $_parImpar['result']; ?>",
 				},
 				dataType: "json"
 			}).done(function( response ){				
